@@ -1,0 +1,79 @@
+*  Info on Soot package
+    The Soot jar (i.e., library)  is present in the `pkgs` dir. We have tested on JAVA 8 and hence its preferable for you to use Java 8 to build the tool and to build the Java applications to analyze.  Install Java 8 JDK on your system before starting, and ensure Java 8 gets invoked when you invoke "java" or "javac" from the command-line terminal. (Test using "java -version".)
+
+    Alternatively, you could use Docker, so that you don't have to change the default Java JDK on your computer. See more instructions on using docker at the end of this file.
+
+*  Install Dependencies
+    Install Graphviz as follows from the shell command line (optional).
+    Graphviz is used for generating the control-flow graphs as PNG files.
+    It is optional to view the CFGs for your work.
+
+    #+begin_src shell
+      apt install graphviz
+    #+end_src
+
+* Steps  to build the tool and the target programs, and to run the tool:
+
+   First, in a shell terminal, "cd" into the directory that you obtain by unzipping the  zip shared with you. This README.org file should be present in this directory.
+
+    + To compile the target programs (i.e., the test programs to analyze),  run from the shell command line:
+
+      #+begin_src  shell
+        ./build-targets
+      #+end_src
+
+    + To compile the Analysis:
+
+      #+begin_src shell
+        ./build-analysis
+      #+end_src
+
+    + To run the analysis on the test program:
+
+      #+begin_src shell
+        ./run-analysis.sh
+      #+end_src
+
+      See  comments in run-analysis.sh to understand how to specify the  parameters to the analysis. 
+
+* Important code files
+    + Analysis.java  -- The main file. You need to implement your analysis
+      in this file. See comments in this file.
+      When you run-analysis.sh as mentioned above, it runs this file.
+      As given to you, the logic in this file only prints the IR of the target
+      method. You need to add your points-to analysis logic to this file.
+
+* Using docker
+
+   To use Docker, first install docker. The steps on Ubuntu to get Docker working are as follows:
+
+      #+begin_src shell
+    sudo apt  install docker.io
+
+    sudo groupadd docker
+
+    sudo usermod -aG docker <your username>
+      #+end_src
+
+   Then, restart your computer. From now on, the docker daemon (dockerd) will run all the time. In case it is not running,  issue "sudo systemctl start docker".
+
+   Now you are ready to start using docker.
+
+   Run the following command within the same directory mentioned earlier in this document: 
+
+      #+begin_src shell
+    docker build -t soot .
+      #+end_src
+
+   (You can replace "soot" with any other name of your liking. This is the name of the image you are building.)
+   
+   Then, to build or use the tool, run:
+
+      #+begin_src shell
+    docker run -it soot
+      #+end_src
+
+   Within the interactive shell of the container, cd to /home/SootAnalysis, then build the target program and the tool, and run the tool on the target program, just as explained earlier in this document.
+
+   If you exit the running container, you can re-start it by noting the name of the container (by running "docker container ps -a"), and then running "docker start -i <container-name>". 
+   
