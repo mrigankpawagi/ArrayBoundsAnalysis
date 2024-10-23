@@ -13,4 +13,3 @@ if [ "$JAVA_OS" == "windows" ]; then
 else
     echo 'export CLASSPATH=".:pkgs/soot-4.3.0-with-deps.jar"'  > environ.sh
 fi
-

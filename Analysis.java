@@ -7,12 +7,7 @@
 // 2) https://github.com/soot-oss/soot/wiki/Tutorials
 
 
-
-////////////////////////////////////////////////////////////////////////////////
 import java.util.*;
-
-////////////////////////////////////////////////////////////////////////////////
-
 import soot.options.Options;
 
 import soot.Unit;
@@ -28,10 +23,6 @@ import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.ExceptionalBlockGraph;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
-
-////////////////////////////////////////////////////////////////////////////////
-
-
 
 public class Analysis {
     private DotGraph dot = new DotGraph("callgraph");
@@ -78,10 +69,10 @@ public class Analysis {
         SootMethod entryMethod = entryClass.getMethodByNameUnsafe("main");
         SootClass targetClass = Scene.v().getSootClassUnsafe(tClass);
         SootMethod targetMethod = entryClass.getMethodByNameUnsafe(tMethod);
-	// A SootClass is Soot's representation of a class in the target program.
-	// A SootMethod is Soot's representation fo a method in the target program.
-	// Pay attention to the code above, as you may need to use the methods used
-	// above at other places in your code as well to find a desired  class or a desired method. 
+	    // A SootClass is Soot's representation of a class in the target program.
+	    // A SootMethod is Soot's representation fo a method in the target program.
+	    // Pay attention to the code above, as you may need to use the methods used
+	    // above at other places in your code as well to find a desired class or a desired method.
 	
         Options.v().set_main_class(mClass);
         Scene.v().setEntryPoints(Collections.singletonList(entryMethod));
@@ -91,11 +82,13 @@ public class Analysis {
         System.out.println("tmethod: " + targetMethod);
         System.out.println("tmethodname: " + tMethod);
         Iterator mi = targetClass.getMethods().iterator();
-	// targetClass.getMethods() retrieves all the methods in targetClass
+	    // targetClass.getMethods() retrieves all the methods in targetClass
         while (mi.hasNext()) {
             SootMethod sm = (SootMethod)mi.next();
-            if(sm.getName().equals(tMethod))
-            {methodFound=true; break;}
+            if(sm.getName().equals(tMethod)) {
+                methodFound = true;
+                break;
+            }
 	    // Not sure why this loop and check is required
         }
 
@@ -120,7 +113,7 @@ public class Analysis {
 	    // Since you are going to implement a flow-insensitive analysis, you
 	    // may not need to know about control-flow graphs at all. 
 
-	    doAnalysis(targetMethod);
+	        doAnalysis(targetMethod);
         } else {
             System.out.println("Method not found: " + tMethod);
         }
@@ -152,17 +145,17 @@ public class Analysis {
         if (!entryMethod.isPhantom() && entryMethod.isConcrete())
         {
             Body body = entryMethod.retrieveActiveBody();
-	    // `body' refers to the code body  of entryMethod
+	        // `body' refers to the code body of entryMethod
 
             int lineno = 0;
             for (Unit u : body.getUnits()) {
-		// .getUnits retrieves all the Units in the code body of the method, as a list. 
-		// A Unit basically represent a single statement or conditional in the Soot IR.
-		// You should fully understand the structure of a Unit, the subtypes of Unit, etc., 
-		// to make progress with your analysis.
-		// Objects of type `Value' in Soot represent  local variables, constants and expressions.
-		// Expressions may be BinopExp, InvokeExpr, and so on.
-		// Boxes: References in Soot are called boxes. There are two types – Unitboxes, ValueBoxes.
+        		// .getUnits retrieves all the Units in the code body of the method, as a list. 
+        		// A Unit basically represent a single statement or conditional in the Soot IR.
+        		// You should fully understand the structure of a Unit, the subtypes of Unit, etc., 
+        		// to make progress with your analysis.
+        		// Objects of type `Value' in Soot represent  local variables, constants and expressions.
+        		// Expressions may be BinopExp, InvokeExpr, and so on.
+        		// Boxes: References in Soot are called boxes. There are two types – Unitboxes, ValueBoxes.
 
                 if (!(u instanceof Stmt)) {
                     continue;
@@ -171,10 +164,6 @@ public class Analysis {
                 printUnit(lineno, body, u);
                 lineno++;
             }
-
         }
     }
-
 }
-
-

@@ -1,19 +1,23 @@
 FROM eclipse-temurin:8-jdk
 
-WORKDIR /home/SootAnalysis
-COPY Analysis.java .
-COPY pkgs ./pkgs
-COPY target1-pub ./target1-pub
-COPY README.org .
-COPY build-analysis.sh .
-COPY build-targets.sh .
-COPY environ.sh .
-COPY run-analysis.sh .
-COPY run-analysis-one.sh .
-COPY get-soot.sh .
+RUN apt-get update && \
+apt-get install -y graphviz img2pdf vim && \
+apt-get clean && \
+rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update
-RUN apt-get -y install graphviz
-RUN apt install vim -y
+RUN useradd -ms /bin/bash SootAnalysis
+USER SootAnalysis
+WORKDIR /home/SootAnalysis
+
+COPY --chown=SootAnalysis:SootAnalysis Analysis.java .
+COPY --chown=SootAnalysis:SootAnalysis pkgs ./pkgs
+COPY --chown=SootAnalysis:SootAnalysis target1-pub ./target1-pub
+COPY --chown=SootAnalysis:SootAnalysis README.org .
+COPY --chown=SootAnalysis:SootAnalysis build-analysis.sh .
+COPY --chown=SootAnalysis:SootAnalysis build-targets.sh .
+COPY --chown=SootAnalysis:SootAnalysis environ.sh .
+COPY --chown=SootAnalysis:SootAnalysis run-analysis.sh .
+COPY --chown=SootAnalysis:SootAnalysis run-analysis-one.sh .
+COPY --chown=SootAnalysis:SootAnalysis get-soot.sh .
 
 ENTRYPOINT ["/bin/bash"]

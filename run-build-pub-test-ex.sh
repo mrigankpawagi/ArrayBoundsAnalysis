@@ -4,8 +4,6 @@ set -e
 
 ## ./run-analysis.sh  <Dir>  <MainClass>  <TargetClass>  <TargetMethod>
 
-
-
 #./run-analysis.sh  "./target1-pub"  "BasicTest"   "BasicTest"   "myIncrement"
 #./run-analysis.sh  "./target1-pub"  "BasicTest"   "BasicTest"   "mySum"
 #./run-analysis.sh  "./target1-pub"  "BasicTest"   "BasicTest"   "add_x"
@@ -44,4 +42,3 @@ cd ./target4-pub/
 
 ## remove  the temp pdfs
 # rm -f tc*.pdf
-
