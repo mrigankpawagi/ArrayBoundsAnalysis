@@ -1,17 +1,17 @@
 ## Steps  to build the tool and the target programs, and to run the tool:
 - Build Docker image
   ```
-  docker build -t PAV_Project .
+  docker build -t pav_project:v1 .
   ```
 
 - Then, to build or use the tool, run:
   ```
-  docker run -it PAV_Project
+  docker run --name pav_project -it pav_project:v1
   ```
 
-  If you exit the running container, you can re-start it by noting the name of the container (by running "docker container ps -a"), and then running
+  If you exit the running container, you can re-start it by noting the name of the container (pav_project), and then running
   ```
-  docker start -i <container-name>"
+  docker start -i pav_project
   ```
 
   Within the interactive shell of the container, cd to /home/SootAnalysis, then build the target program and the tool, and run the tool on the target program, as explained below:
