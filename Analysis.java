@@ -24,6 +24,15 @@ import soot.toolkits.graph.ExceptionalBlockGraph;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
 
+import soot.Local;
+import soot.IntType;
+import soot.LongType;
+import soot.ByteType;
+import soot.ShortType;
+import soot.ValueBox;
+import soot.toolkits.graph.UnitGraph;
+import soot.toolkits.graph.BriefUnitGraph;
+
 public class Analysis {
     private DotGraph dot = new DotGraph("callgraph");
     private static HashMap<String, Boolean> visited = new
@@ -33,10 +42,46 @@ public class Analysis {
     }
 
     public static void doAnalysis(SootMethod targetMethod){
-	/*************************************************************
-         * You can implement your analysis here. In general,
-           you may implement your analysis in other classes, and invoke that code from here. 
-         ************************************************************/
+        // Get integer variables (considering byte, short, int, long)
+        Body body = targetMethod.retrieveActiveBody();
+        List<Local> integerLocals = new ArrayList<>();
+
+        for (Local local : body.getLocals()) {
+            if (
+                    local.getType() instanceof IntType || 
+                    local.getType() instanceof LongType || 
+                    local.getType() instanceof ByteType || 
+                    local.getType() instanceof ShortType
+                ) {
+                integerLocals.add(local);
+            }
+        }
+
+        // Get statements that use integer variables
+        List<Unit> intStatements = new ArrayList<>();
+        for (Unit unit : body.getUnits()) {
+            for (ValueBox box : unit.getUseAndDefBoxes()) {
+                if (box.getValue() instanceof Local && integerLocals.contains((Local) box.getValue())) {
+                    intStatements.add(unit);
+                    break;
+                }
+            }
+        }
+
+        // build a control flow graph
+        UnitGraph cfg = new BriefUnitGraph(body);
+        for (Unit unit : intStatements) {
+            System.out.println("Statement: " + unit);
+            List<Unit> successors = cfg.getSuccsOf(unit);
+            for (Unit succ : successors) {
+                if (intStatements.contains(succ)) {
+                    System.out.println("  Successor: " + succ);
+                }
+            }
+        }
+
+        System.out.println("Integer locals: " + integerLocals);
+        System.out.println("Integer statements: " + intStatements);
     }
 
     public static void main(String[] args) {
