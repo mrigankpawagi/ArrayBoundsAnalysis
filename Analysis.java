@@ -32,6 +32,7 @@ import soot.ShortType;
 import soot.ValueBox;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.graph.BriefUnitGraph;
+import soot.jimple.IfStmt;
 
 public class Analysis {
     private DotGraph dot = new DotGraph("callgraph");
@@ -41,11 +42,39 @@ public class Analysis {
     public Analysis() {
     }
 
-    public static void doAnalysis(SootMethod targetMethod){
-        // Get integer variables (considering byte, short, int, long)
-        Body body = targetMethod.retrieveActiveBody();
-        List<Local> integerLocals = new ArrayList<>();
+    public static class Pair<A, B> {
+        public A first;
+        public B second;
 
+        public Pair(A first, B second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        public boolean equals(Object o) {
+            if (o instanceof Pair) {
+                Pair p = (Pair) o;
+                return first.equals(p.first) && second.equals(p.second);
+            }
+            return false;
+        }
+
+        public int hashCode() {
+            return first.hashCode() + second.hashCode();
+        }
+
+        public String toString() {
+            return "(" + first + ", " + second + ")";
+        }
+    }
+
+
+
+    public static void doAnalysis(SootMethod targetMethod){
+        Body body = targetMethod.retrieveActiveBody();
+
+        // Get integer variables (considering byte, short, int, long)
+        List<Local> integerLocals = new ArrayList<>();
         for (Local local : body.getLocals()) {
             if (
                     local.getType() instanceof IntType || 
@@ -68,20 +97,72 @@ public class Analysis {
             }
         }
 
-        // build a control flow graph
-        UnitGraph cfg = new BriefUnitGraph(body);
-        for (Unit unit : intStatements) {
-            System.out.println("Statement: " + unit);
-            List<Unit> successors = cfg.getSuccsOf(unit);
-            for (Unit succ : successors) {
-                if (intStatements.contains(succ)) {
-                    System.out.println("  Successor: " + succ);
-                }
+        // Create the CFG for the method
+        UnitGraph graph = new BriefUnitGraph(body);
+        Map<Unit, Set<Unit>> flow = new HashMap<>();
+        Unit entry = graph.getHeads().get(0);
+        for (Unit u : graph) {
+            flow.put(u, new HashSet<Unit>());
+            List<Unit> succs = graph.getSuccsOf(u);
+            for (Unit succ : succs) {
+                flow.get(u).add(succ);
             }
         }
 
-        System.out.println("Integer locals: " + integerLocals);
-        System.out.println("Integer statements: " + intStatements);
+        // create a CFG based on program-points
+        Map<Integer, Set<Integer>> flowPoints = new HashMap<>();
+        int entryPoint = 0;
+        
+        // map from pairs of program-points to enclosing unit
+        Map<Pair<Integer, Integer>, Unit> enclosingUnit = new HashMap<>();
+
+        // maintain a set of true branches
+        Set<Pair<Integer, Integer>> trueBranches = new HashSet<>();
+
+        // add a point before every unit
+        Map<Unit, Integer> pointBeforeUnit = new HashMap<>();
+        pointBeforeUnit.put(entry, entryPoint);
+        int i = 1;
+        for (Unit u : graph) {
+            if (u != entry) {
+                pointBeforeUnit.put(u, i);
+                i++;
+            }
+        }
+
+        // populate flowPoints and enclosingUnit
+        for (Unit u : flow.keySet()) {
+            int uPoint = pointBeforeUnit.get(u);
+            Set<Integer> succPoints = new HashSet<>();
+            for (Unit succ : flow.get(u)) {
+                int succPoint = pointBeforeUnit.get(succ);
+                succPoints.add(succPoint);
+                enclosingUnit.put(new Pair<>(uPoint, succPoint), u);
+
+                // if u was an if statement, check if succ is the true-descendant
+                if (u instanceof IfStmt) {
+                    IfStmt ifStmt = (IfStmt) u;
+                    Unit trueTarget = ifStmt.getTarget();
+                    boolean isTrueBranch = succ.equals(trueTarget);
+                    if (isTrueBranch) {
+                        trueBranches.add(new Pair<>(uPoint, succPoint));
+                    }
+                }
+            }
+            flowPoints.put(uPoint, succPoints);
+        }
+
+        // nicely print flowPoints and enclosingUnit
+        for (int j : flowPoints.keySet()) {
+            System.out.println("Program-point: " + j + " -> " + flowPoints.get(j));
+        }
+        for (Pair<Integer, Integer> pair : enclosingUnit.keySet()) {
+            System.out.println("Pair: " + pair + " -> " + enclosingUnit.get(pair));
+        }
+        for (Pair<Integer, Integer> pair : trueBranches) {
+            System.out.println("True branch: " + pair);
+        }
+        // ^ these three data structures are what we will need :)
     }
 
     public static void main(String[] args) {
