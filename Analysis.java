@@ -9,7 +9,6 @@
 
 import java.util.*;
 import soot.options.Options;
-
 import soot.Unit;
 import soot.Scene;
 import soot.Body;
@@ -18,12 +17,10 @@ import soot.SootMethod;
 import soot.jimple.Stmt;
 import soot.UnitPrinter;
 import soot.NormalUnitPrinter;
-
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.ExceptionalBlockGraph;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
-
 import soot.Local;
 import soot.IntType;
 import soot.LongType;
@@ -34,65 +31,22 @@ import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.graph.BriefUnitGraph;
 
 public class Analysis {
+    private static ArrayList<ArrayList<Integer>> in = new ArrayList<ArrayList<Integer>>();
+    private static List<Unit> unitList = new ArrayList<Unit>();
+    private static Queue<Unit> workList = new LinkedList<Unit>();
+    private static Body body = null;
+    private static ExceptionalUnitGraph graph = null;
     private DotGraph dot = new DotGraph("callgraph");
-    private static HashMap<String, Boolean> visited = new
-        HashMap<String, Boolean>();
-
-    public Analysis() {
-    }
-
-    public static void doAnalysis(SootMethod targetMethod){
-        // Get integer variables (considering byte, short, int, long)
-        Body body = targetMethod.retrieveActiveBody();
-        List<Local> integerLocals = new ArrayList<>();
-
-        for (Local local : body.getLocals()) {
-            if (
-                    local.getType() instanceof IntType || 
-                    local.getType() instanceof LongType || 
-                    local.getType() instanceof ByteType || 
-                    local.getType() instanceof ShortType
-                ) {
-                integerLocals.add(local);
-            }
-        }
-
-        // Get statements that use integer variables
-        List<Unit> intStatements = new ArrayList<>();
-        for (Unit unit : body.getUnits()) {
-            for (ValueBox box : unit.getUseAndDefBoxes()) {
-                if (box.getValue() instanceof Local && integerLocals.contains((Local) box.getValue())) {
-                    intStatements.add(unit);
-                    break;
-                }
-            }
-        }
-
-        // build a control flow graph
-        UnitGraph cfg = new BriefUnitGraph(body);
-        for (Unit unit : intStatements) {
-            System.out.println("Statement: " + unit);
-            List<Unit> successors = cfg.getSuccsOf(unit);
-            for (Unit succ : successors) {
-                if (intStatements.contains(succ)) {
-                    System.out.println("  Successor: " + succ);
-                }
-            }
-        }
-
-        System.out.println("Integer locals: " + integerLocals);
-        System.out.println("Integer statements: " + intStatements);
-    }
+    private static HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
+    private static SootMethod targetMethod = null;
 
     public static void main(String[] args) {
-
         String targetDirectory=args[0];
         String mClass=args[1];
         String tClass=args[2];
         String tMethod=args[3];
         String upperBound=args[4];
         boolean methodFound=false;
-
 
         List<String> procDir = new ArrayList<String>();
         procDir.add(targetDirectory);
@@ -113,7 +67,7 @@ public class Analysis {
         SootClass entryClass = Scene.v().getSootClassUnsafe(mClass);
         SootMethod entryMethod = entryClass.getMethodByNameUnsafe("main");
         SootClass targetClass = Scene.v().getSootClassUnsafe(tClass);
-        SootMethod targetMethod = entryClass.getMethodByNameUnsafe(tMethod);
+        targetMethod = entryClass.getMethodByNameUnsafe(tMethod);
 	    // A SootClass is Soot's representation of a class in the target program.
 	    // A SootMethod is Soot's representation fo a method in the target program.
 	    // Pay attention to the code above, as you may need to use the methods used
@@ -134,36 +88,92 @@ public class Analysis {
                 methodFound = true;
                 break;
             }
-	    // Not sure why this loop and check is required
         }
 
         if(methodFound) {
             printInfo(targetMethod);
-	    // the call above prints the Soot IR (Intermediate Represenation) of the targetMethod.
-	    // You can use the same printInfo method appropriately
-	    // to view the IR of any method.
-
-	    // Note: Your analysis will work not on the source code of the target program, but on
-            // the Soot IR only. Soot automatically generates the IR of every method from the compiled
-	    // .class files. In other words, any Soot-based analysis needs only the .class files, and does
-	    // not need or use the source .java files. The IR is similar to a three-address code. 
-
-	    /*****************************************************************
-             * XXX The function doAnalysis is the entry point for the Kildall's 
-             * fix-point algorithm over the LatticeElement.
-             ******************************************************************/
-
             drawMethodDependenceGraph(targetMethod);
-	    // the call above generates the control-flow graph of the targetMethod.
-	    // Since you are going to implement a flow-insensitive analysis, you
-	    // may not need to know about control-flow graphs at all. 
+            body = targetMethod.retrieveActiveBody();
+            graph = new ExceptionalUnitGraph(body);
+            unitList = getUnits();
 
+            // Construct the initial Flowfacts
+            for (int i = 0; i < unitList.size(); i++) {
+                    in.add(new ArrayList<Integer>());
+            }
+
+            workList = new LinkedList<Unit>(reverse(unitList));
 	        doAnalysis(targetMethod);
-        } else {
+        }
+        else {
             System.out.println("Method not found: " + tMethod);
         }
     }
 
+    public static void doAnalysis(SootMethod targetMethod) {
+        while (!workList.isEmpty()) {
+            Unit curr = workList.poll();
+            for (Unit pred : graph.getPredsOf(curr)) {
+                // Get union of flowfact(pred) and transfer function applied to (flowfact(curr), pred)
+                ArrayList<Integer> value = union( in.get(unitList.indexOf(pred)), transferFunction(in.get(unitList.indexOf(curr)), pred));
+
+                // If union is not equal to existing flowfact(pred), set flowfact(pred) to union value
+                if (!IntervalEquals(in.get(unitList.indexOf(pred)), value)) {
+                    in.set(unitList.indexOf(pred), value);
+                    // Add pred back to worklist if flowfact has changed
+                    if (!workList.contains(pred)) {
+                      workList.add(pred);
+                    }
+                }
+            }
+        }
+    }
+
+    // Transfer functions
+    public static ArrayList<Integer> transferFunction(ArrayList<Integer> out, Unit stmt) {
+        ArrayList<Integer> in = new ArrayList<Integer>();
+
+
+
+        return in;
+    }
+
+    // Union
+    public static ArrayList<Integer> union(ArrayList<Integer> i1, ArrayList<Integer> i2) {
+        ArrayList<Integer> intervals = new ArrayList<Integer>();
+
+
+
+        return intervals;
+    }
+
+    // Check if both intervals are the same
+    public static boolean IntervalEquals(ArrayList<Integer> i1, ArrayList<Integer> i2) {
+
+
+
+
+
+        return false;
+    }
+
+    // Reverse a list
+    public static List<Unit> reverse(List<Unit> inp) {
+        List<Unit> rev = inp;
+
+
+        return rev;
+    }
+
+    // Return Jimple code as a list of statements
+    private static List<Unit> getUnits() {
+        List<Unit> units = new ArrayList<Unit>();
+        body = targetMethod.retrieveActiveBody();
+        for (Unit u : body.getUnits()) {
+            units.add(u);
+        }
+        return units;
+    }
 
     private static void drawMethodDependenceGraph(SootMethod method){
         if (!method.isPhantom() && method.isConcrete())
