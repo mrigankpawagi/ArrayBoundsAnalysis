@@ -1,12 +1,3 @@
-// This program will plot a CFG for a method using soot
-// [ExceptionalUnitGraph feature].
-// Arguements : <ProcessOrTargetDirectory> <MainClass> <TargetClass> <TargetMethod>
-
-// Ref:
-// 1) https://gist.github.com/bdqnghi/9d8d990b29caeb4e5157d7df35e083ce
-// 2) https://github.com/soot-oss/soot/wiki/Tutorials
-
-
 import java.util.*;
 import soot.options.Options;
 import soot.Unit;
@@ -68,10 +59,6 @@ public class Analysis {
         SootMethod entryMethod = entryClass.getMethodByNameUnsafe("main");
         SootClass targetClass = Scene.v().getSootClassUnsafe(tClass);
         targetMethod = entryClass.getMethodByNameUnsafe(tMethod);
-	    // A SootClass is Soot's representation of a class in the target program.
-	    // A SootMethod is Soot's representation fo a method in the target program.
-	    // Pay attention to the code above, as you may need to use the methods used
-	    // above at other places in your code as well to find a desired class or a desired method.
 	
         Options.v().set_main_class(mClass);
         Scene.v().setEntryPoints(Collections.singletonList(entryMethod));
@@ -110,6 +97,7 @@ public class Analysis {
         }
     }
 
+    // Killdall's Analysis
     public static void doAnalysis(SootMethod targetMethod) {
         while (!workList.isEmpty()) {
             Unit curr = workList.poll();
@@ -195,23 +183,13 @@ public class Analysis {
         System.out.println(linenostr + up.toString());
     }
 
-
     private static void printInfo(SootMethod entryMethod) {
         if (!entryMethod.isPhantom() && entryMethod.isConcrete())
         {
             Body body = entryMethod.retrieveActiveBody();
-	        // `body' refers to the code body of entryMethod
 
             int lineno = 0;
             for (Unit u : body.getUnits()) {
-        		// .getUnits retrieves all the Units in the code body of the method, as a list. 
-        		// A Unit basically represent a single statement or conditional in the Soot IR.
-        		// You should fully understand the structure of a Unit, the subtypes of Unit, etc., 
-        		// to make progress with your analysis.
-        		// Objects of type `Value' in Soot represent  local variables, constants and expressions.
-        		// Expressions may be BinopExp, InvokeExpr, and so on.
-        		// Boxes: References in Soot are called boxes. There are two types – Unitboxes, ValueBoxes.
-
                 if (!(u instanceof Stmt)) {
                     continue;
                 }
