@@ -31,7 +31,7 @@ public class Analysis {
         LatticeElement join(LatticeElement other);
 
         // Application of transfer functions (based on statements)
-        LatticeElement tf_assignment(Stmt stmt);
+        LatticeElement tf_assignment(Stmt stmt, boolean isTrueBranch);
 
         // equals method
         boolean equals(Object o);
@@ -84,11 +84,16 @@ public class Analysis {
             return new IntervalElement(newIntervalMap);
         }
 
-        public LatticeElement tf_assignment(Stmt stmt) {
+        // isTrueBranch is False if an alternate branch is taken (like the false branch of an if statement)
+        public LatticeElement tf_assignment(Stmt stmt, boolean isTrueBranch) {
             if (this.equals(bot)) {
                 return bot; // bot is always transformed to bot
             }
             return bot; // TODO: Implement the transfer functions
+        }
+
+        public LatticeElement tf_assignment(Stmt stmt) {
+            return tf_assignment(stmt, true);
         }
 
         public boolean equals(Object o) {
