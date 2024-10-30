@@ -13,7 +13,7 @@ set -e
 # For simplicity you can assume that all the classes of your program are in
 # a single package, which is the "default" (i.e., unnamed) package.
 
-./get-soot.sh
+# ./get-soot.sh
 ./build-targets.sh
 ./build-analysis.sh
 ./run-analysis-one.sh "./target1-pub" "BasicTest"   "BasicTest"   "fun1" 150
