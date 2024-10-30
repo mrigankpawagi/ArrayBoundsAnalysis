@@ -203,14 +203,21 @@ public class Analysis {
             }
         }
 
-        // Populate flowPoints and enclosingUnit
+        // Populate flowPoints, enclosingUnit, programPoint and trueBranches
+        List<Integer> programPoint = new List<Integer>();
         for (Unit u : flow.keySet()) {
             int uPoint = pointBeforeUnit.get(u);
+            if(!programPoint.contains(uPoint)) {
+                programPoint.add(uPoint);
+            }
             Set<Integer> succPoints = new HashSet<>();
             for (Unit succ : flow.get(u)) {
                 int succPoint = pointBeforeUnit.get(succ);
                 succPoints.add(succPoint);
                 enclosingUnit.put(new Pair<>(uPoint, succPoint), u);
+                if(!programPoint.contains(succPoint)) {
+                    programPoint.add(succPoint);
+                }
 
                 // if u was an if statement, check if succ is the true-descendant
                 if (u instanceof IfStmt) {
