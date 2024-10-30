@@ -184,17 +184,17 @@ public class Analysis {
             }
         }
 
-        // create a CFG based on program-points
+        // Create a CFG based on program-points
         Map<Integer, Set<Integer>> flowPoints = new HashMap<>();
         int entryPoint = 0;
 
-        // map from pairs of program-points to enclosing unit
+        // Map from pairs of program-points to enclosing unit
         Map<Pair<Integer, Integer>, Unit> enclosingUnit = new HashMap<>();
 
-        // maintain a set of true branches
+        // Maintain a set of true branches
         Set<Pair<Integer, Integer>> trueBranches = new HashSet<>();
 
-        // add a point before every unit
+        // Add a point before every unit
         Map<Unit, Integer> pointBeforeUnit = new HashMap<>();
         pointBeforeUnit.put(entry, entryPoint);
         int i = 1;
@@ -205,7 +205,7 @@ public class Analysis {
             }
         }
 
-        // populate flowPoints and enclosingUnit
+        // Populate flowPoints and enclosingUnit
         for (Unit u : flow.keySet()) {
             int uPoint = pointBeforeUnit.get(u);
             Set<Integer> succPoints = new HashSet<>();
@@ -227,7 +227,7 @@ public class Analysis {
             flowPoints.put(uPoint, succPoints);
         }
 
-        // nicely print flowPoints and enclosingUnit
+        // Nicely print flowPoints and enclosingUnit
         for (int j : flowPoints.keySet()) {
             System.out.println("Program-point: " + j + " -> " + flowPoints.get(j));
         }
@@ -240,9 +240,11 @@ public class Analysis {
         // ^ these three data structures are what we will need :)
     }
 
-    public static <T> Map<Unit, LatticeElement> runKildall(Class<? extends LatticeElement> latticeElementClass,
-            LatticeElement initialElement, Map<Integer, Set<Integer>> flowPoints,
-            Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
+    public static <T> Map<Unit, LatticeElement> runKildall(Class<? extends LatticeElement> latticeElementClass, LatticeElement initialElement,
+        Map<Integer, Set<Integer>> flowPoints, Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
+    
+        
+        
         return null; // TODO: Implement Kildall's algorithm
     }
 
