@@ -22,6 +22,14 @@ import soot.ValueBox;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.jimple.IfStmt;
+import soot.jimple.AssignStmt;
+import soot.Value;
+import soot.jimple.IntConstant;
+import soot.jimple.FloatConstant;
+import soot.jimple.ConditionExpr;
+import soot.jimple.BinopExpr;
+import soot.jimple.LtExpr;
+import soot.jimple.Constant;
 
 public class Analysis {
     public interface LatticeElement {
@@ -33,11 +41,21 @@ public class Analysis {
 
         // Equals method
         boolean equals(Object o);
+
+        LatticeElement getBot();
     }
 
     public static class IntervalElement implements LatticeElement {
         private Map<Local, Pair<Float, Float>> intervalMap;
         public static final IntervalElement bot = new IntervalElement();
+
+        public LatticeElement getBot() {
+            return bot.clone();
+        }
+        
+        // lowerBound and upperBound for the intervals
+        public static float lowerBound = Float.NEGATIVE_INFINITY;
+        public static float upperBound = Float.POSITIVE_INFINITY;
 
         public IntervalElement(Map<Local, Pair<Float, Float>> intervalMap) {
             // check that all intervals are valid
@@ -48,6 +66,15 @@ public class Analysis {
                 }
             }
             this.intervalMap = intervalMap;
+
+            // check all intervals and replace lower limit by -inf if it is less than lowerBound
+            // and upper limit by +inf if it is greater than upperBound
+            for (Local local : intervalMap.keySet()) {
+                Pair<Float, Float> interval = intervalMap.get(local);
+                float newLower = interval.first ? interval.first >= lowerBound : Float.NEGATIVE_INFINITY;
+                float newUpper = interval.second ? interval.second <= upperBound : Float.POSITIVE_INFINITY;
+                intervalMap.put(local, new Pair<>(newLower, newUpper));
+            }
         }
 
         // Private constructor for bot
@@ -87,7 +114,56 @@ public class Analysis {
             if (this.equals(bot)) {
                 return bot; // bot is always transformed to bot
             }
-            return bot; // TODO: Implement the transfer functions
+            if (stmt instanceof AssignStmt) {
+                // Handle assignment cases as before
+                AssignStmt assignStmt = (AssignStmt) stmt;
+                Local leftVar = (Local) assignStmt.getLeftOp();
+                Value rightOp = assignStmt.getRightOp();
+
+                Map<Local, Pair<Float, Float>> newIntervalMap = new HashMap<>(this.intervalMap);
+
+                if (rightOp instanceof IntConstant || rightOp instanceof FloatConstant) {
+                    // Case (1): var = constant
+                    float value = rightOp instanceof IntConstant
+                            ? ((IntConstant) rightOp).value
+                            : ((FloatConstant) rightOp).value;
+                    newIntervalMap.put(leftVar, new Pair<>(value, value));
+                } else if (rightOp instanceof BinopExpr) {
+                    // Handle binary operations similarly
+                    // (same logic as previously discussed)
+                }
+                return new IntervalElement(newIntervalMap);
+
+            } else if (stmt instanceof IfStmt) {
+                IfStmt ifStmt = (IfStmt) stmt;
+                ConditionExpr condition = (ConditionExpr) ifStmt.getCondition();
+
+                Map<Local, Pair<Float, Float>> newIntervalMap = new HashMap<>(this.intervalMap);
+
+                // Check condition type and refine intervals
+                if (condition instanceof LtExpr) {
+                    Value op1 = condition.getOp1();
+                    Value op2 = condition.getOp2();
+                    if (op1 instanceof Local && op2 instanceof Constant) {
+                        Local var = (Local) op1;
+                        float constant = ((FloatConstant) op2).value;
+                        Pair<Float, Float> currentInterval = intervalMap.get(var);
+                        if (isTrueBranch) {
+                            // True branch: var < constant
+                            newIntervalMap.put(var,
+                                    new Pair<>(currentInterval.first, Math.min(currentInterval.second, constant - 1)));
+                        } else {
+                            // False branch: var >= constant
+                            newIntervalMap.put(var,
+                                    new Pair<>(Math.max(currentInterval.first, constant), currentInterval.second));
+                        }
+                    }
+                    // Repeat for other condition types (EqExpr, GeExpr, etc.)
+                }
+                return new IntervalElement(newIntervalMap);
+            }
+
+            return this.clone(); // unhandled statements
         }
 
         public LatticeElement tf_assignment(Stmt stmt) {
@@ -110,6 +186,10 @@ public class Analysis {
 
         public String toString() {
             return isBot() ? "bot" : intervalMap.toString();
+        }
+
+        public IntervalElement clone() {
+            return new IntervalElement(new HashMap<>(intervalMap));
         }
     }
 
@@ -203,21 +283,14 @@ public class Analysis {
             }
         }
 
-        // Populate flowPoints, enclosingUnit, programPoint and trueBranches
-        List<Integer> programPoint = new List<Integer>();
+        // populate flowPoints and enclosingUnit
         for (Unit u : flow.keySet()) {
             int uPoint = pointBeforeUnit.get(u);
-            if(!programPoint.contains(uPoint)) {
-                programPoint.add(uPoint);
-            }
             Set<Integer> succPoints = new HashSet<>();
             for (Unit succ : flow.get(u)) {
                 int succPoint = pointBeforeUnit.get(succ);
                 succPoints.add(succPoint);
                 enclosingUnit.put(new Pair<>(uPoint, succPoint), u);
-                if(!programPoint.contains(succPoint)) {
-                    programPoint.add(succPoint);
-                }
 
                 // if u was an if statement, check if succ is the true-descendant
                 if (u instanceof IfStmt) {
@@ -243,9 +316,6 @@ public class Analysis {
             System.out.println("True branch: " + pair);
         }
         // ^ these three data structures are what we will need :)
-
-        // d0 = IntervalElement(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)
-        // runKilldall(IntervalElement.class, d0, flowPoints, enclosingUnit, trueBranches);
     }
 
     public static <T> Map<Unit, LatticeElement> runKilldall(Class<? extends LatticeElement> latticeElementClass, LatticeElement initialElement,
@@ -279,7 +349,7 @@ public class Analysis {
         String mClass = args[1];
         String tClass = args[2];
         String tMethod = args[3];
-        String upperBound = args[4];
+        float upperBound = Float.parseFloat(args[4]);
         boolean methodFound = false;
 
         List<String> procDir = new ArrayList<String>();
@@ -323,6 +393,9 @@ public class Analysis {
 
         if (methodFound) {
             drawMethodDependenceGraph(targetMethod);
+
+            IntervalElement.lowerBound = 0;
+            IntervalElement.upperBound = upperBound;
             doAnalysis(targetMethod);
         } else {
             System.out.println("Method not found: " + tMethod);
