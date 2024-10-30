@@ -236,10 +236,16 @@ public class Analysis {
             System.out.println("True branch: " + pair);
         }
         // ^ these three data structures are what we will need :)
+
+        // d0 = IntervalElement(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY)
+        // runKilldall(IntervalElement.class, d0, flowPoints, enclosingUnit, trueBranches);
     }
 
     public static <T> Map<Unit, LatticeElement> runKilldall(Class<? extends LatticeElement> latticeElementClass, LatticeElement initialElement,
         Map<Integer, Set<Integer>> flowPoints, Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
+            
+            // facts: {0: initialElement, 1: latticeElementClass.getBot(), 2: latticeElementClass.getBot(), ...}
+
         // Flesh out the details
         while(marked) {
             current = marked.pop();
@@ -250,6 +256,14 @@ public class Analysis {
                 marked.push(successors(current));
             }
         }
+
+        // marked => Set of marked program points
+        // flowPoints: map from program points to successors
+        // enclosingUnit[pair(m, n)] => statement between program points m and n
+        // trueBranches: set of pairs of program points that are true branches
+
+        // element.tf_assignment(enclosingUnit[pair(m, n)], pair(m,n) in trueBranches?)
+        // bot: latticeElementClass.getBot()
     }
 
     public static void main(String[] args) {
