@@ -9,12 +9,10 @@ import soot.SootMethod;
 import soot.jimple.Stmt;
 import soot.UnitPrinter;
 import soot.NormalUnitPrinter;
-
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.toolkits.graph.ExceptionalBlockGraph;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
-
 import soot.Local;
 import soot.IntType;
 import soot.LongType;
@@ -33,7 +31,7 @@ public class Analysis {
         // Application of transfer functions (based on statements)
         LatticeElement tf_assignment(Stmt stmt, boolean isTrueBranch);
 
-        // equals method
+        // Equals method
         boolean equals(Object o);
     }
 
@@ -240,12 +238,18 @@ public class Analysis {
         // ^ these three data structures are what we will need :)
     }
 
-    public static <T> Map<Unit, LatticeElement> runKildall(Class<? extends LatticeElement> latticeElementClass, LatticeElement initialElement,
+    public static <T> Map<Unit, LatticeElement> runKilldall(Class<? extends LatticeElement> latticeElementClass, LatticeElement initialElement,
         Map<Integer, Set<Integer>> flowPoints, Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
-    
-        
-        
-        return null; // TODO: Implement Kildall's algorithm
+        // Flesh out the details
+        while(marked) {
+            current = marked.pop();
+            result = tranferfunction(current);
+            if(result != successorFact(current)) {
+                newSuccessorFact = union(successorFact(current), result);
+                setFact(successors(current), newSuccessorFact);
+                marked.push(successors(current));
+            }
+        }
     }
 
     public static void main(String[] args) {
