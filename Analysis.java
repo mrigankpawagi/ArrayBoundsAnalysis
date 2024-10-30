@@ -631,20 +631,17 @@ public class Analysis {
             flowPoints.put(uPoint, succPoints);
         }
 
-        // Nicely print flowPoints and enclosingUnit
-        for (int j : flowPoints.keySet()) {
-            System.out.println("Program-point: " + j + " -> " + flowPoints.get(j));
+        // Run the Kildall's algorithm
+        Map<Local, Pair<Float, Float>> initialIntervalMap = new HashMap<>();
+        for (Local local : integerLocals) {
+            initialIntervalMap.put(local, new Pair<>(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY));
         }
-        for (Pair<Integer, Integer> pair : enclosingUnit.keySet()) {
-            System.out.println("Pair: " + pair + " -> " + enclosingUnit.get(pair));
-        }
-        for (Pair<Integer, Integer> pair : trueBranches) {
-            System.out.println("True branch: " + pair);
-        }
-        // ^ these three data structures are what we will need :)
+        IntervalElement initialElement = new IntervalElement(initialIntervalMap);
+
+        Map<Integer, LatticeElement> result = runKildall(IntervalElement.class, initialElement, flowPoints, enclosingUnit, trueBranches);
     }
 
-    public static <T> Map<Unit, LatticeElement> runKilldall(Class<? extends LatticeElement> latticeElementClass,
+    public static <T> Map<Integer, LatticeElement> runKildall(Class<? extends LatticeElement> latticeElementClass,
             LatticeElement initialElement,
             Map<Integer, Set<Integer>> flowPoints, Map<Pair<Integer, Integer>, Unit> enclosingUnit,
             Set<Pair<Integer, Integer>> trueBranches) {
