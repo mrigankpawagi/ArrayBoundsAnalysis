@@ -275,6 +275,15 @@ public class Analysis {
             }
         }
 
+        private float getValueFromConstant(Value value) {
+            if (value instanceof IntConstant) {
+                return (float) ((IntConstant) value).value;
+            } else if (value instanceof FloatConstant) {
+                return (float) ((FloatConstant) value).value;
+            }
+            throw new IllegalArgumentException("Invalid constant type: " + value);
+        }
+
         // isTrueBranch is False if an alternate branch is taken (like the false branch
         // of an if statement)
         public LatticeElement tf_assignment(Stmt stmt, boolean isTrueBranch) {
@@ -292,9 +301,7 @@ public class Analysis {
 
                     if (rightOp instanceof IntConstant || rightOp instanceof FloatConstant) {
                         // var = constant
-                        float value = rightOp instanceof IntConstant
-                                ? (float) ((IntConstant) rightOp).value
-                                : (float) ((FloatConstant) rightOp).value;
+                        float value = getValueFromConstant(rightOp);
                         newIntervalMap.put(leftVar, new Pair<>(value, value));
                     } else if (rightOp instanceof Local) {
                         // var = var2
@@ -344,7 +351,7 @@ public class Analysis {
                         } else if (binopExpr.getOp1() instanceof Local && binopExpr.getOp2() instanceof Constant) {
                             // var = var2 op constant
                             Local var = (Local) binopExpr.getOp1();
-                            float constant = ((FloatConstant) binopExpr.getOp2()).value;
+                            float constant = getValueFromConstant(binopExpr.getOp2());
                             if (this.intervalMap.containsKey(var)) {
                                 Pair<Float, Float> interval = this.intervalMap.get(var);
                                 try {
@@ -362,7 +369,7 @@ public class Analysis {
                         } else if (binopExpr.getOp1() instanceof Constant && binopExpr.getOp2() instanceof Local) {
                             // var = constant op var2
                             Local var = (Local) binopExpr.getOp2();
-                            float constant = ((FloatConstant) binopExpr.getOp1()).value;
+                            float constant = getValueFromConstant(binopExpr.getOp1());
                             if (this.intervalMap.containsKey(var)) {
                                 Pair<Float, Float> interval = this.intervalMap.get(var);
                                 try {
@@ -412,7 +419,7 @@ public class Analysis {
                 if (opSymbol != null) {
                     if (op1 instanceof Local && op2 instanceof Constant) {
                         Local var = (Local) op1;
-                        float constant = ((FloatConstant) op2).value;
+                        float constant = getValueFromConstant(op2);
                         if (this.intervalMap.containsKey(var)) {
                             Pair<Float, Float> interval1 = this.intervalMap.get(var);
                             Pair<Float, Float> interval2;
@@ -435,7 +442,7 @@ public class Analysis {
                         }
                     } else if (op1 instanceof Constant && op2 instanceof Local) {
                         Local var = (Local) op2;
-                        float constant = ((FloatConstant) op1).value;
+                        float constant = getValueFromConstant(op1);
                         if (this.intervalMap.containsKey(var)) {
                             Pair<Float, Float> interval2 = this.intervalMap.get(var);
                             Pair<Float, Float> interval1;
@@ -520,6 +527,9 @@ public class Analysis {
         }
 
         public IntervalElement clone() {
+            if (isBot()) {
+                return new IntervalElement();
+            }
             return new IntervalElement(new HashMap<>(intervalMap));
         }
     }
@@ -645,36 +655,49 @@ public class Analysis {
 
         Map<Integer, LatticeElement> result = runKildall(IntervalElement.class, initialElement, flowPoints,
                 enclosingUnit, trueBranches);
+
+        // Print the results
+        for (Unit u : intStatements) {
+            int point = pointBeforeUnit.get(u);
+            System.out.println("At point " + point + ": " + result.get(point));
+        }
     }
 
     public static <T> Map<Integer, LatticeElement> runKildall(Class<? extends LatticeElement> latticeElementClass,
             LatticeElement initialElement,
             Map<Integer, Set<Integer>> flowPoints, Map<Pair<Integer, Integer>, Unit> enclosingUnit,
             Set<Pair<Integer, Integer>> trueBranches) {
+        // Initialize facts with initial lattice elements
+        Map<Integer, LatticeElement> facts = new HashMap<>();
+        for (Integer point : flowPoints.keySet()) {
+            facts.put(point, initialElement.getBot());
+        }
+        facts.put(0, initialElement);
 
-        // facts: {0: initialElement, 1: latticeElementClass.getBot(), 2:
-        // latticeElementClass.getBot(), ...}
+        // Initialize worklist with all nodes in the flowPoints
+        Queue<Integer> worklist = new LinkedList<>(flowPoints.keySet());
 
-        // Flesh out the details
-        // while(marked) {
-        // current = marked.pop();
-        // result = tranferfunction(current);
-        // if(result != successorFact(current)) {
-        // newSuccessorFact = union(successorFact(current), result);
-        // setFact(successors(current), newSuccessorFact);
-        // marked.push(successors(current));
-        // }
-        // }
+        // Process the worklist
+        while (!worklist.isEmpty()) {
+            Integer current = worklist.poll();
+            LatticeElement oldFact = facts.get(current);
 
-        // marked => Set of marked program points
-        // flowPoints: map from program points to successors
-        // enclosingUnit[pair(m, n)] => statement between program points m and n
-        // trueBranches: set of pairs of program points that are true branches
+            // Compute the current fact to all successors
+            for (Integer succ : flowPoints.get(current)) {
+                Pair<Integer, Integer> transition = new Pair<>(current, succ);
+                LatticeElement newFact = oldFact.tf_assignment((Stmt) enclosingUnit.get(transition),
+                        trueBranches.contains(transition));
+                LatticeElement oldSuccFact = facts.get(succ);
+                LatticeElement newSuccFact = oldSuccFact.join(newFact);
+                facts.put(succ, newSuccFact);
+                if (!newSuccFact.equals(oldSuccFact)) {
+                    worklist.add(succ);
+                }
+            }
+        }
 
-        // element.tf_assignment(enclosingUnit[pair(m, n)], pair(m,n) in trueBranches?)
-        // bot: latticeElementClass.getBot()
-
-        return null;
+        // Return the final facts map
+        return facts;
     }
 
     public static void main(String[] args) {
