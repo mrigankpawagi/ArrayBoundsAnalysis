@@ -215,6 +215,7 @@ public class Analysis {
         private Pair<Pair<Float, Float>, Pair<Float, Float>> getIntervalsAfterComparison(String opSymbol,
                 Pair<Float, Float> interval1, Pair<Float, Float> interval2) {
             Float lower1, upper1, lower2, upper2;
+            Pair<Pair<Float, Float>, Pair<Float, Float>> result;
             switch (opSymbol) {
                 case "<":
                     if (interval1.first >= interval2.second) {
@@ -226,7 +227,9 @@ public class Analysis {
                     upper2 = interval2.second;
                     return new Pair<>(new Pair<>(lower1, upper1), new Pair<>(lower2, upper2));
                 case ">":
-                    return getIntervalsAfterComparison("<", interval2, interval1);
+                    result = getIntervalsAfterComparison("<", interval2,
+                            interval1);
+                    return new Pair<>(result.second, result.first);
                 case "<=":
                     if (interval1.first > interval2.second) {
                         throw new ArithmeticException("Unreachable code");
@@ -237,7 +240,9 @@ public class Analysis {
                     upper2 = interval2.second;
                     return new Pair<>(new Pair<>(lower1, upper1), new Pair<>(lower2, upper2));
                 case ">=":
-                    return getIntervalsAfterComparison("<=", interval2, interval1);
+                    result = getIntervalsAfterComparison("<=", interval2,
+                            interval1);
+                    return new Pair<>(result.second, result.first);
                 case "==":
                     if (interval1.first > interval2.second || interval1.second < interval2.first) {
                         throw new ArithmeticException("Unreachable code");
@@ -638,7 +643,8 @@ public class Analysis {
         }
         IntervalElement initialElement = new IntervalElement(initialIntervalMap);
 
-        Map<Integer, LatticeElement> result = runKildall(IntervalElement.class, initialElement, flowPoints, enclosingUnit, trueBranches);
+        Map<Integer, LatticeElement> result = runKildall(IntervalElement.class, initialElement, flowPoints,
+                enclosingUnit, trueBranches);
     }
 
     public static <T> Map<Integer, LatticeElement> runKildall(Class<? extends LatticeElement> latticeElementClass,
