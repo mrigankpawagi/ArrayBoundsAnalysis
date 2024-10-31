@@ -684,7 +684,6 @@ public class Analysis {
         // Initialize facts with initial lattice elements
         for (Integer point : flowPoints.keySet()) {
             facts.put(point, initialElement.getBot());
-            trace.add(new Pair<Integer, LatticeElement>(point, initialElement.getBot()));
         }
         facts.put(0, initialElement);
         trace.add(new Pair<Integer, LatticeElement>(0, initialElement));
