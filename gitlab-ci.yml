@@ -1,0 +1,9 @@
+image: eclipse-temurin:8-jdk
+stages:
+  - test
+
+java-test:
+  stage: test
+  script:
+    - chmod +x run-analysis.sh
+    - ./run-analysis.sh
