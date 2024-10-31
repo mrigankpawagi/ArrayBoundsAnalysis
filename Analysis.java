@@ -326,11 +326,11 @@ public class Analysis {
                             }
                         }
                     } else if (rightOp instanceof BinopExpr) {
-                        // var = var2 op var3
                         BinopExpr binopExpr = (BinopExpr) rightOp;
-                        String opSymbol = binopExpr.getSymbol();
+                        String opSymbol = binopExpr.getSymbol().trim();
 
                         if (binopExpr.getOp1() instanceof Local && binopExpr.getOp2() instanceof Local) {
+                            // var = var2 op var3
                             Local var1 = (Local) binopExpr.getOp1();
                             Local var2 = (Local) binopExpr.getOp2();
                             if (this.intervalMap.containsKey(var1) && this.intervalMap.containsKey(var2)) {
@@ -653,18 +653,33 @@ public class Analysis {
         }
         IntervalElement initialElement = new IntervalElement(initialIntervalMap);
 
-        Map<Integer, LatticeElement> result = runKildall(IntervalElement.class, initialElement, flowPoints,
+        Map<Integer, LatticeElement> result = runKildall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
-
+        
+        // // print the statements in the method
+        // printInfo(targetMethod);
+        
+        // // print flowPoints, enclosingUnit, and trueBranches
+        // System.out.println("Flow points:");
+        // for (Integer point : flowPoints.keySet()) {
+        //     System.out.println(point + ": " + flowPoints.get(point));
+        // }
+        // System.out.println("Enclosing unit:");
+        // for (Pair<Integer, Integer> transition : enclosingUnit.keySet()) {
+        //     System.out.println(transition + ": " + enclosingUnit.get(transition));
+        // }
+        // System.out.println("True branches:");
+        // for (Pair<Integer, Integer> transition : trueBranches) {
+        //     System.out.println(transition);
+        // }
+        
         // Print the results
-        for (Unit u : intStatements) {
-            int point = pointBeforeUnit.get(u);
-            System.out.println("At point " + point + ": " + result.get(point));
+        for (Integer p : result.keySet()) {
+            System.out.println("At point " + p + ": " + result.get(p));
         }
     }
 
-    public static <T> Map<Integer, LatticeElement> runKildall(Class<? extends LatticeElement> latticeElementClass,
-            LatticeElement initialElement,
+    public static Map<Integer, LatticeElement> runKildall(LatticeElement initialElement,
             Map<Integer, Set<Integer>> flowPoints, Map<Pair<Integer, Integer>, Unit> enclosingUnit,
             Set<Pair<Integer, Integer>> trueBranches) {
         // Initialize facts with initial lattice elements
@@ -685,8 +700,7 @@ public class Analysis {
             // Compute the current fact to all successors
             for (Integer succ : flowPoints.get(current)) {
                 Pair<Integer, Integer> transition = new Pair<>(current, succ);
-                LatticeElement newFact = oldFact.tf_assignment((Stmt) enclosingUnit.get(transition),
-                        trueBranches.contains(transition));
+                LatticeElement newFact = oldFact.tf_assignment((Stmt) enclosingUnit.get(transition), trueBranches.contains(transition));
                 LatticeElement oldSuccFact = facts.get(succ);
                 LatticeElement newSuccFact = oldSuccFact.join(newFact);
                 facts.put(succ, newSuccFact);
