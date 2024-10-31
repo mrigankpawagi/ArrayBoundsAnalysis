@@ -656,27 +656,7 @@ public class Analysis {
         Map<Integer, LatticeElement> result = runKildall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
         
-        // // print the statements in the method
-        // printInfo(targetMethod);
-        
-        // // print flowPoints, enclosingUnit, and trueBranches
-        // System.out.println("Flow points:");
-        // for (Integer point : flowPoints.keySet()) {
-        //     System.out.println(point + ": " + flowPoints.get(point));
-        // }
-        // System.out.println("Enclosing unit:");
-        // for (Pair<Integer, Integer> transition : enclosingUnit.keySet()) {
-        //     System.out.println(transition + ": " + enclosingUnit.get(transition));
-        // }
-        // System.out.println("True branches:");
-        // for (Pair<Integer, Integer> transition : trueBranches) {
-        //     System.out.println(transition);
-        // }
-        
-        // Print the results
-        for (Integer p : result.keySet()) {
-            System.out.println("At point " + p + ": " + result.get(p));
-        }
+        printOutput(result);
     }
 
     public static Map<Integer, LatticeElement> runKildall(LatticeElement initialElement,
@@ -714,6 +694,52 @@ public class Analysis {
         return facts;
     }
 
+    public static String targetDirectory;
+    public static String tClass;
+    public static String tMethod;
+
+    private static void printOutput(Map<Integer, LatticeElement> result) {
+        // create a file tclass.tmethod.output.txt
+        String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".output.txt";
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
+            java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+
+            for (Integer point : result.keySet()) {
+                // skip the entry point (0)
+                if (point == 0) {
+                    continue;
+                }
+                // pad the point number so it is always 2 digits
+                String statementNumber = String.format("%02d", point);
+                if (((IntervalElement) result.get(point)).intervalMap == null) {
+                    pw.println(tClass + "." + tMethod + ": in" + statementNumber + ": bot");
+                    continue;
+                }
+                // sort variables by name
+                List<Local> locals = new ArrayList<>(((IntervalElement) result.get(point)).intervalMap.keySet());
+                Collections.sort(locals, new Comparator<Local>() {
+                    public int compare(Local l1, Local l2) {
+                        return l1.getName().compareTo(l2.getName());
+                    }
+                });
+                for (Local local : locals) {
+                    Pair<Float, Float> interval = ((IntervalElement) result.get(point)).intervalMap.get(local);
+
+                    String lower = interval.first == Float.NEGATIVE_INFINITY ? "-inf" : String.valueOf(Math.round(interval.first));
+                    String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
+                    pw.print(tClass + "." + tMethod + ": in" + statementNumber + ": ");
+                    pw.println(local.getName() + ":[" + lower + ", " + upper + "]");
+                } 
+            }
+
+            pw.close();
+            fw.close();
+        } catch (java.io.IOException e) {
+            System.out.println("Error writing to file " + outputFileName);
+        }
+    }
+
     public static void main(String[] args) {
 
         String targetDirectory = args[0];
@@ -722,6 +748,10 @@ public class Analysis {
         String tMethod = args[3];
         float upperBound = Float.parseFloat(args[4]);
         boolean methodFound = false;
+
+        Analysis.targetDirectory = targetDirectory;
+        Analysis.tClass = tClass;
+        Analysis.tMethod = tMethod;
 
         List<String> procDir = new ArrayList<String>();
         procDir.add(targetDirectory);
