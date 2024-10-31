@@ -741,7 +741,6 @@ public class Analysis {
     }
 
     public static void main(String[] args) {
-
         String targetDirectory = args[0];
         String mClass = args[1];
         String tClass = args[2];
@@ -769,10 +768,10 @@ public class Analysis {
 
         Scene.v().loadNecessaryClasses();
 
-        SootClass entryClass = Scene.v().getSootClassUnsafe(mClass);
+        SootClass entryClass = Scene.v().getSootClass(mClass);
         SootMethod entryMethod = entryClass.getMethodByNameUnsafe("main");
-        SootClass targetClass = Scene.v().getSootClassUnsafe(tClass);
-        SootMethod targetMethod = entryClass.getMethodByNameUnsafe(tMethod);
+        SootClass targetClass = Scene.v().getSootClass(tClass);
+        SootMethod targetMethod = entryClass.getMethodByName(tMethod);
 
         Options.v().set_main_class(mClass);
         Scene.v().setEntryPoints(Collections.singletonList(entryMethod));
@@ -781,6 +780,7 @@ public class Analysis {
         System.out.println("tclass: " + targetClass);
         System.out.println("tmethod: " + targetMethod);
         System.out.println("tmethodname: " + tMethod);
+        // mi iterates over all methods in the targetClass
         Iterator mi = targetClass.getMethods().iterator();
         // targetClass.getMethods() retrieves all the methods in targetClass
         while (mi.hasNext()) {
@@ -789,9 +789,9 @@ public class Analysis {
                 methodFound = true;
                 break;
             }
-            // Not sure why this loop and check is required
         }
 
+        // If tMethod is found in targetClass 
         if (methodFound) {
             drawMethodDependenceGraph(targetMethod);
 
@@ -800,6 +800,7 @@ public class Analysis {
             doAnalysis(targetMethod);
         } else {
             System.out.println("Method not found: " + tMethod);
+            System.exit(1);
         }
     }
 
@@ -825,7 +826,6 @@ public class Analysis {
     private static void printInfo(SootMethod entryMethod) {
         if (!entryMethod.isPhantom() && entryMethod.isConcrete()) {
             Body body = entryMethod.retrieveActiveBody();
-            // `body' refers to the code body of entryMethod
             int lineno = 0;
             for (Unit u : body.getUnits()) {
                 if (!(u instanceof Stmt)) {
