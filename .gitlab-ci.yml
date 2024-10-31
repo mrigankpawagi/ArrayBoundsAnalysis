@@ -5,5 +5,8 @@ stages:
 java-test:
   stage: test
   script:
+    - chmod +x build-targets.sh
+    - chmod +x build-analysis.sh
+    - chmod +x run-analysis-one.sh
     - chmod +x run-analysis.sh
     - ./run-analysis.sh
