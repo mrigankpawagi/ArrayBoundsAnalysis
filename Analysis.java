@@ -39,6 +39,39 @@ import soot.jimple.NeExpr;
 import soot.jimple.Constant;
 
 public class Analysis {
+    public static String targetDirectory;
+    public static String tClass;
+    public static String tMethod;
+
+    private DotGraph dot = new DotGraph("callgraph");
+    private static HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
+
+    public static class Pair<A, B> {
+        public A first;
+        public B second;
+
+        public Pair(A first, B second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        public boolean equals(Object o) {
+            if (o instanceof Pair) {
+                Pair p = (Pair) o;
+                return first.equals(p.first) && second.equals(p.second);
+            }
+            return false;
+        }
+
+        public int hashCode() {
+            return first.hashCode() + second.hashCode();
+        }
+
+        public String toString() {
+            return "(" + first + ", " + second + ")";
+        }
+    }
+
     public interface LatticeElement {
         // Join operation
         LatticeElement join(LatticeElement other);
@@ -118,6 +151,7 @@ public class Analysis {
             return this.intervalMap == null;
         }
 
+        // Join operation with another LatticeElement
         public LatticeElement join(LatticeElement other) {
             if (!(other instanceof IntervalElement)) {
                 throw new IllegalArgumentException("Incompatible types for join");
@@ -534,38 +568,7 @@ public class Analysis {
         }
     }
 
-    private DotGraph dot = new DotGraph("callgraph");
-    private static HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
-
-    public Analysis() {
-    }
-
-    public static class Pair<A, B> {
-        public A first;
-        public B second;
-
-        public Pair(A first, B second) {
-            this.first = first;
-            this.second = second;
-        }
-
-        public boolean equals(Object o) {
-            if (o instanceof Pair) {
-                Pair p = (Pair) o;
-                return first.equals(p.first) && second.equals(p.second);
-            }
-            return false;
-        }
-
-        public int hashCode() {
-            return first.hashCode() + second.hashCode();
-        }
-
-        public String toString() {
-            return "(" + first + ", " + second + ")";
-        }
-    }
-
+    // Analysis function
     public static void doAnalysis(SootMethod targetMethod) {
         Body body = targetMethod.retrieveActiveBody();
 
@@ -653,15 +656,15 @@ public class Analysis {
         }
         IntervalElement initialElement = new IntervalElement(initialIntervalMap);
 
-        Map<Integer, LatticeElement> result = runKildall(initialElement, flowPoints,
+        Map<Integer, LatticeElement> result = runKilldall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
         
         printOutput(result);
     }
 
-    public static Map<Integer, LatticeElement> runKildall(LatticeElement initialElement,
-            Map<Integer, Set<Integer>> flowPoints, Map<Pair<Integer, Integer>, Unit> enclosingUnit,
-            Set<Pair<Integer, Integer>> trueBranches) {
+    // Running Killdall's algorithm
+    public static Map<Integer, LatticeElement> runKilldall(LatticeElement initialElement, Map<Integer, Set<Integer>> flowPoints,
+            Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
         // Initialize facts with initial lattice elements
         Map<Integer, LatticeElement> facts = new HashMap<>();
         for (Integer point : flowPoints.keySet()) {
@@ -694,52 +697,6 @@ public class Analysis {
         return facts;
     }
 
-    public static String targetDirectory;
-    public static String tClass;
-    public static String tMethod;
-
-    private static void printOutput(Map<Integer, LatticeElement> result) {
-        // create a file tclass.tmethod.output.txt
-        String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".output.txt";
-        try {
-            java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
-            java.io.PrintWriter pw = new java.io.PrintWriter(fw);
-
-            for (Integer point : result.keySet()) {
-                // skip the entry point (0)
-                if (point == 0) {
-                    continue;
-                }
-                // pad the point number so it is always 2 digits
-                String statementNumber = String.format("%02d", point);
-                if (((IntervalElement) result.get(point)).intervalMap == null) {
-                    pw.println(tClass + "." + tMethod + ": in" + statementNumber + ": bot");
-                    continue;
-                }
-                // sort variables by name
-                List<Local> locals = new ArrayList<>(((IntervalElement) result.get(point)).intervalMap.keySet());
-                Collections.sort(locals, new Comparator<Local>() {
-                    public int compare(Local l1, Local l2) {
-                        return l1.getName().compareTo(l2.getName());
-                    }
-                });
-                for (Local local : locals) {
-                    Pair<Float, Float> interval = ((IntervalElement) result.get(point)).intervalMap.get(local);
-
-                    String lower = interval.first == Float.NEGATIVE_INFINITY ? "-inf" : String.valueOf(Math.round(interval.first));
-                    String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
-                    pw.print(tClass + "." + tMethod + ": in" + statementNumber + ": ");
-                    pw.println(local.getName() + ":[" + lower + ", " + upper + "]");
-                } 
-            }
-
-            pw.close();
-            fw.close();
-        } catch (java.io.IOException e) {
-            System.out.println("Error writing to file " + outputFileName);
-        }
-    }
-
     public static void main(String[] args) {
         String targetDirectory = args[0];
         String mClass = args[1];
@@ -769,14 +726,14 @@ public class Analysis {
         Scene.v().loadNecessaryClasses();
 
         SootClass entryClass = Scene.v().getSootClass(mClass);
-        SootMethod entryMethod = entryClass.getMethodByNameUnsafe("main");
+        //SootMethod entryMethod = entryClass.getMethodByNameUnsafe("main");
         SootClass targetClass = Scene.v().getSootClass(tClass);
         SootMethod targetMethod = entryClass.getMethodByName(tMethod);
 
         Options.v().set_main_class(mClass);
-        Scene.v().setEntryPoints(Collections.singletonList(entryMethod));
+        //Scene.v().setEntryPoints(Collections.singletonList(entryMethod));
 
-        // System.out.println (entryClass.getName());
+        //System.out.println(entryClass.getName());
         System.out.println("tclass: " + targetClass);
         System.out.println("tmethod: " + targetMethod);
         System.out.println("tmethodname: " + tMethod);
@@ -835,6 +792,48 @@ public class Analysis {
                 printUnit(lineno, body, u);
                 lineno++;
             }
+        }
+    }
+
+    private static void printOutput(Map<Integer, LatticeElement> result) {
+        // create a file tclass.tmethod.output.txt
+        String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".output.txt";
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
+            java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+
+            for (Integer point : result.keySet()) {
+                // skip the entry point (0)
+                if (point == 0) {
+                    continue;
+                }
+                // pad the point number so it is always 2 digits
+                String statementNumber = String.format("%02d", point);
+                if (((IntervalElement) result.get(point)).intervalMap == null) {
+                    pw.println(tClass + "." + tMethod + ": in" + statementNumber + ": bot");
+                    continue;
+                }
+                // sort variables by name
+                List<Local> locals = new ArrayList<>(((IntervalElement) result.get(point)).intervalMap.keySet());
+                Collections.sort(locals, new Comparator<Local>() {
+                    public int compare(Local l1, Local l2) {
+                        return l1.getName().compareTo(l2.getName());
+                    }
+                });
+                for (Local local : locals) {
+                    Pair<Float, Float> interval = ((IntervalElement) result.get(point)).intervalMap.get(local);
+
+                    String lower = interval.first == Float.NEGATIVE_INFINITY ? "-inf" : String.valueOf(Math.round(interval.first));
+                    String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
+                    pw.print(tClass + "." + tMethod + ": in" + statementNumber + ": ");
+                    pw.println(local.getName() + ":[" + lower + ", " + upper + "]");
+                } 
+            }
+
+            pw.close();
+            fw.close();
+        } catch (java.io.IOException e) {
+            System.out.println("Error writing to file " + outputFileName);
         }
     }
 }
