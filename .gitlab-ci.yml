@@ -5,6 +5,7 @@ stages:
 java-test:
   stage: test
   script:
+    - apt-get update && apt-get install -y graphviz 
     - chmod +x build-targets.sh
     - chmod +x build-analysis.sh
     - chmod +x run-analysis-one.sh
