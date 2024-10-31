@@ -73,6 +73,14 @@ public class Analysis {
         public String toString() {
             return "(" + first + ", " + second + ")";
         }
+
+        public A first() {
+            return first;
+        }
+
+        public B second() {
+            return second;
+        }
     }
 
     public interface LatticeElement {
@@ -663,6 +671,7 @@ public class Analysis {
                 enclosingUnit, trueBranches);
         
         printOutput(result);
+        printTrace();
     }
 
     // Running Killdall's algorithm
@@ -679,7 +688,7 @@ public class Analysis {
         }
         facts.put(0, initialElement);
         trace.add(new Pair<Integer, LatticeElement>(0, initialElement));
-        trace.add(new Pair<Integer, LatticeElement>(-1, initialElement.getBot()));  // Spacer to 
+        trace.add(new Pair<Integer, LatticeElement>(-1, initialElement.getBot()));  // Spacer representing newline
 
         // Initialize worklist with all nodes in the flowPoints
         Queue<Integer> worklist = new LinkedList<>(flowPoints.keySet());
@@ -696,10 +705,12 @@ public class Analysis {
                 LatticeElement oldSuccFact = facts.get(succ);
                 LatticeElement newSuccFact = oldSuccFact.join(newFact);
                 facts.put(succ, newSuccFact);
+                trace.add(new Pair<Integer, LatticeElement>(succ, newSuccFact));
                 if (!newSuccFact.equals(oldSuccFact)) {
                     worklist.add(succ);
                 }
             }
+            trace.add(new Pair<Integer, LatticeElement>(-1, initialElement.getBot()));
         }
 
         // Return the final facts map
@@ -832,6 +843,49 @@ public class Analysis {
                 });
                 for (Local local : locals) {
                     Pair<Float, Float> interval = ((IntervalElement) result.get(point)).intervalMap.get(local);
+
+                    String lower = interval.first == Float.NEGATIVE_INFINITY ? "-inf" : String.valueOf(Math.round(interval.first));
+                    String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
+                    pw.print(tClass + "." + tMethod + ": in" + statementNumber + ": ");
+                    pw.println(local.getName() + ":[" + lower + ", " + upper + "]");
+                } 
+            }
+
+            pw.close();
+            fw.close();
+        } catch (java.io.IOException e) {
+            System.out.println("Error writing to file " + outputFileName);
+        }
+    }
+
+    // Generate File 2 ouput as mentioned in the requirements
+    private static void printTrace() {
+        // Create a file tclass.tmethod.fulloutput.txt
+        String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".fulloutput.txt";
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
+            java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+
+            for (Pair<Integer,LatticeElement> point : trace) {
+                if (point.first() == -1) {
+                    pw.println("\n");
+                    continue;
+                }
+                // Pad the point number so it is always 2 digits
+                String statementNumber = String.format("%02d", point.first());
+                if (((IntervalElement) point.second()).intervalMap == null) {
+                    pw.println(tClass + "." + tMethod + ": in" + statementNumber + ": bot");
+                    continue;
+                }
+                // Sort variables by name
+                List<Local> locals = new ArrayList<>(((IntervalElement) point.second()).intervalMap.keySet());
+                Collections.sort(locals, new Comparator<Local>() {
+                    public int compare(Local l1, Local l2) {
+                        return l1.getName().compareTo(l2.getName());
+                    }
+                });
+                for (Local local : locals) {
+                    Pair<Float, Float> interval = ((IntervalElement) point.second()).intervalMap.get(local);
 
                     String lower = interval.first == Float.NEGATIVE_INFINITY ? "-inf" : String.valueOf(Math.round(interval.first));
                     String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
