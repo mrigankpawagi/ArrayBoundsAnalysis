@@ -46,6 +46,9 @@ public class Analysis {
     private DotGraph dot = new DotGraph("callgraph");
     private static HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
 
+    // Trace will store details necessary for File 2 (fulloutput.txt)
+    private static List<Pair<Integer, LatticeElement>> trace = new ArrayList<>();
+
     public static class Pair<A, B> {
         public A first;
         public B second;
@@ -665,12 +668,18 @@ public class Analysis {
     // Running Killdall's algorithm
     public static Map<Integer, LatticeElement> runKilldall(LatticeElement initialElement, Map<Integer, Set<Integer>> flowPoints,
             Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
-        // Initialize facts with initial lattice elements
+        // facts will store details necessary for output.txt
+        // trace will store details necessary for fulloutput.txt
         Map<Integer, LatticeElement> facts = new HashMap<>();
+        
+        // Initialize facts with initial lattice elements
         for (Integer point : flowPoints.keySet()) {
             facts.put(point, initialElement.getBot());
+            trace.add(new Pair<Integer, LatticeElement>(point, initialElement.getBot()));
         }
         facts.put(0, initialElement);
+        trace.add(new Pair<Integer, LatticeElement>(0, initialElement));
+        trace.add(new Pair<Integer, LatticeElement>(-1, initialElement.getBot()));  // Spacer to 
 
         // Initialize worklist with all nodes in the flowPoints
         Queue<Integer> worklist = new LinkedList<>(flowPoints.keySet());
@@ -795,25 +804,26 @@ public class Analysis {
         }
     }
 
+    // Generate File 1 ouput as mentioned in the requirements
     private static void printOutput(Map<Integer, LatticeElement> result) {
-        // create a file tclass.tmethod.output.txt
+        // Create a file tclass.tmethod.output.txt
         String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".output.txt";
         try {
             java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
             java.io.PrintWriter pw = new java.io.PrintWriter(fw);
 
             for (Integer point : result.keySet()) {
-                // skip the entry point (0)
+                // Skip the entry point (0)
                 if (point == 0) {
                     continue;
                 }
-                // pad the point number so it is always 2 digits
+                // Pad the point number so it is always 2 digits
                 String statementNumber = String.format("%02d", point);
                 if (((IntervalElement) result.get(point)).intervalMap == null) {
                     pw.println(tClass + "." + tMethod + ": in" + statementNumber + ": bot");
                     continue;
                 }
-                // sort variables by name
+                // Sort variables by name
                 List<Local> locals = new ArrayList<>(((IntervalElement) result.get(point)).intervalMap.keySet());
                 Collections.sort(locals, new Comparator<Local>() {
                     public int compare(Local l1, Local l2) {
