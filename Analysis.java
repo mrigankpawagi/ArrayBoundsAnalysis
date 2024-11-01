@@ -830,7 +830,7 @@ public class Analysis {
                 // Pad the point number so it is always 2 digits
                 String statementNumber = String.format("%02d", point);
                 if (((IntervalElement) result.get(point)).intervalMap == null) {
-                    pw.println(tClass + "." + tMethod + ": in" + statementNumber + ": bot");
+                    // skip printing bot
                     continue;
                 }
                 // Sort variables by name
