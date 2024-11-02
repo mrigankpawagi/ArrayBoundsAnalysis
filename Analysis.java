@@ -864,16 +864,20 @@ public class Analysis {
         try {
             java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
             java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+            boolean wasLastLineNewline = false;
 
             for (Pair<Integer,LatticeElement> point : trace) {
                 if (point.first() == -1) {
-                    pw.println("\n");
+                    if (!wasLastLineNewline) {
+                        pw.println("");
+                        wasLastLineNewline = true;
+                    }
                     continue;
                 }
                 // Pad the point number so it is always 2 digits
                 String statementNumber = String.format("%02d", point.first());
                 if (((IntervalElement) point.second()).intervalMap == null) {
-                    pw.println(tClass + "." + tMethod + ": in" + statementNumber + ": bot");
+                    // skip printing bot
                     continue;
                 }
                 // Sort variables by name
@@ -890,6 +894,7 @@ public class Analysis {
                     String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
                     pw.print(tClass + "." + tMethod + ": in" + statementNumber + ": ");
                     pw.println(local.getName() + ":[" + lower + ", " + upper + "]");
+                    wasLastLineNewline = false;
                 } 
             }
 
