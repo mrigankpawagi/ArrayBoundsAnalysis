@@ -114,8 +114,8 @@ public class Analysis {
             for (Local local : givenIntervalMap.keySet()) {
                 Pair<Float, Float> interval = givenIntervalMap.get(local);
                 if (interval.first > interval.second) {
-                    throw new IllegalArgumentException(
-                            "Invalid interval for " + local + ": " + givenIntervalMap.get(local));
+                    this.intervalMap = null; // make this element bot
+                    return;
                 }
             }
             this.intervalMap = givenIntervalMap;
@@ -130,15 +130,16 @@ public class Analysis {
                 float newUpper = interval.second == Float.POSITIVE_INFINITY ? Float.POSITIVE_INFINITY
                         : (float) Math.floor(interval.second);
                 if (newLower > newUpper) {
-                    throw new IllegalArgumentException(
-                            "Invalid interval for " + local + ": " + givenIntervalMap.get(local));
+                    this.intervalMap = null; // make this element bot
+                    return;
                 }
                 intervalMap.put(local, new Pair<>(newLower, newUpper));
             }
 
             // sanity check
             if (lowerBound > upperBound) {
-                throw new IllegalArgumentException("Invalid bounds: [" + lowerBound + ", " + upperBound + "]");
+                this.intervalMap = null; // make this element bot
+                return;
             }
 
             // check all intervals and replace lower limit by -inf if it is less than
