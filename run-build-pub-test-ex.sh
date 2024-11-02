@@ -2,11 +2,11 @@
 
 set -e
 
-## ./run-analysis.sh  <Dir>  <MainClass>  <TargetClass>  <TargetMethod>
+## ./run-analysis.sh <Dir> <MainClass> <TargetClass> <TargetMethod>
 
-#./run-analysis.sh  "./target1-pub"  "BasicTest"   "BasicTest"   "myIncrement"
-#./run-analysis.sh  "./target1-pub"  "BasicTest"   "BasicTest"   "mySum"
-#./run-analysis.sh  "./target1-pub"  "BasicTest"   "BasicTest"   "add_x"
+#./run-analysis.sh "./target1-pub" "BasicTest" "BasicTest" "myIncrement"
+#./run-analysis.sh "./target1-pub" "BasicTest" "BasicTest" "mySum"
+#./run-analysis.sh "./target1-pub" "BasicTest" "BasicTest" "add_x"
 
 function build-pub-example() {
     SNO=$1
@@ -26,7 +26,6 @@ build-pub-example "01"  "BasicTest1"   "myIncrement"
 build-pub-example "02"  "BasicTest1"   "mySum"
 build-pub-example "03"  "BasicTest1"   "add_x"
 build-pub-example "04"  "BasicTest1"   "myChoose"
-
 
 
 ########################################

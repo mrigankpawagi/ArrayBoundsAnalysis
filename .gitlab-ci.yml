@@ -11,3 +11,10 @@ java-test:
     - chmod +x run-analysis-one.sh
     - chmod +x run-analysis.sh
     - ./run-analysis.sh
+  artifacts:
+    paths:
+    - target1-pub/BasicTest.fun1.fulloutput.txt
+    - target1-pub/BasicTest.fun1.output.txt
+    - target1-pub/BasicTest.fun2.fulloutput.txt
+    - target1-pub/BasicTest.fun2.output.txt
+    expire_in: 1 week

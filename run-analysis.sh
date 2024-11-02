@@ -2,7 +2,7 @@
 
 set -e
 
-## ./run-analysis-one.sh  <Dir>  <MainClass>  <TargetClass>  <TargetMethod>
+## ./run-analysis-one.sh <Dir> <MainClass> <TargetClass> <TargetMethod>
 
 # <Dir> is the directory that contains the target program.
 # <MainClass> is the name of the class that contains the "main" method. 

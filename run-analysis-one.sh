@@ -5,7 +5,7 @@
 set -e
 
 if [ $# -ne 5 ]; then
-    echo "Usage: run-analysis-one.sh  dirname mainclass tclass tmethod upperbound"
+    echo "Usage: run-analysis-one.sh dirname mainclass tclass tmethod upperbound"
     exit 1
 fi
 
@@ -20,17 +20,17 @@ source environ.sh
 echo === running Analysis.java
 echo === Points to ANALYSIS
 
-# time java  -Xms800m -Xmx3g Analysis "./target" "AddNumFun" "AddNumFun" "expr"
+# time java -Xms800m -Xmx3g Analysis "./target" "AddNumFun" "AddNumFun" "expr"
 
 
 ## clean the output files
 rm -f $DIRNAME/$TARGETCLASS.$TARGETMETHOD.output.txt
 rm -f $DIRNAME/$TARGETCLASS.$TARGETMETHOD.fulloutput.txt
 
-echo  "=== Running" Analysis "$DIRNAME" "$MAINCLASS"  "$TARGETCLASS"  "$TARGETMETHOD" "$UPPERBOUND"
+echo  "=== Running" Analysis "$DIRNAME" "$MAINCLASS" "$TARGETCLASS" "$TARGETMETHOD" "$UPPERBOUND"
 
 time \
-    java -Xms800m -Xmx3g Analysis "$DIRNAME"  "$MAINCLASS"  "$TARGETCLASS"  "$TARGETMETHOD" "$UPPERBOUND"
+    java -Xms800m -Xmx3g Analysis "$DIRNAME" "$MAINCLASS" "$TARGETCLASS" "$TARGETMETHOD" "$UPPERBOUND"
 
 
 dot -Tpng -o cfg.png ${TARGETMETHOD}cfg.dot
