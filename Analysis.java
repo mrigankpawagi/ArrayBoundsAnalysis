@@ -667,15 +667,15 @@ public class Analysis {
         }
         IntervalElement initialElement = new IntervalElement(initialIntervalMap);
 
-        Map<Integer, LatticeElement> result = runKilldall(initialElement, flowPoints,
+        Map<Integer, LatticeElement> result = runKildall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
         
         printOutput(result);
         printTrace();
     }
 
-    // Running Killdall's algorithm
-    public static Map<Integer, LatticeElement> runKilldall(LatticeElement initialElement, Map<Integer, Set<Integer>> flowPoints,
+    // Running Kildall's algorithm
+    public static Map<Integer, LatticeElement> runKildall(LatticeElement initialElement, Map<Integer, Set<Integer>> flowPoints,
             Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
         // facts will store details necessary for output.txt
         // trace will store details necessary for fulloutput.txt
