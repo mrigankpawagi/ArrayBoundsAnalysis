@@ -1,0 +1,49 @@
+BasicTest.bar: in01: r0:{new00}
+
+BasicTest.bar: in02: r0:{new00}
+BasicTest.bar: in02: r1:{new01}
+
+BasicTest.bar: in03: r0:{new00}
+BasicTest.bar: in03: r1:{new01}
+
+BasicTest.bar: in04: r0:{new00}
+BasicTest.bar: in04: r1:{new01}
+
+BasicTest.bar: in05: r0:{new00}
+BasicTest.bar: in05: r1:{new01}
+BasicTest.bar: in05: r2:{r0}
+
+BasicTest.bar: in06: r0:{new00}
+BasicTest.bar: in06: r1:{new01}
+
+BasicTest.bar: in07: r0:{new00}
+BasicTest.bar: in07: r1:{new01}
+BasicTest.bar: in07: r2:{r0,r1}
+
+BasicTest.bar: in08: r0:{new00}
+BasicTest.bar: in08: r1:{new01}
+BasicTest.bar: in08: r2:{r0,r1}
+
+BasicTest.bar: in09: r0:{new00}
+BasicTest.bar: in09: r1:{new01}
+BasicTest.bar: in09: r2:{r0,r1}
+
+BasicTest.bar: in10: r0:{new00}
+BasicTest.bar: in10: r1:{new01}
+BasicTest.bar: in10: r2:{r0,r1}
+
+BasicTest.bar: in11: r0:{new00}
+BasicTest.bar: in11: r1:{new01}
+BasicTest.bar: in11: r2:{r0,r1}
+
+BasicTest.bar: in12: r0:{new00}
+BasicTest.bar: in12: r1:{new01}
+BasicTest.bar: in12: r2:{r0,r1}
+
+BasicTest.bar: in13: r0:{new00}
+BasicTest.bar: in13: r1:{new01}
+BasicTest.bar: in13: r2:{r0,r1}
+
+BasicTest.bar: in14: r0:{new00}
+BasicTest.bar: in14: r1:{new01}
+BasicTest.bar: in14: r2:{r0,r1}

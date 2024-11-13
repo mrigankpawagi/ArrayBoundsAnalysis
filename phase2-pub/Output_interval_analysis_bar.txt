@@ -1,0 +1,69 @@
+BasicTest.bar: in01: $i0:[-inf, inf]
+BasicTest.bar: in01: $i1:[-inf, inf]
+BasicTest.bar: in01: $i2:[-inf, inf]
+BasicTest.bar: in01: i3:[-inf, inf]
+
+BasicTest.bar: in02: $i0:[-inf, inf]
+BasicTest.bar: in02: $i1:[-inf, inf]
+BasicTest.bar: in02: $i2:[-inf, inf]
+BasicTest.bar: in02: i3:[-inf, inf]
+
+BasicTest.bar: in03: $i0:[-inf, inf]
+BasicTest.bar: in03: $i1:[-inf, inf]
+BasicTest.bar: in03: $i2:[-inf, inf]
+BasicTest.bar: in03: i3:[-inf, inf]
+
+BasicTest.bar: in04: $i0:[-inf, inf]
+BasicTest.bar: in04: $i1:[-inf, inf]
+BasicTest.bar: in04: $i2:[-inf, inf]
+BasicTest.bar: in04: i3:[-inf, inf]
+
+BasicTest.bar: in05: $i0:[-inf, inf]
+BasicTest.bar: in05: $i1:[-inf, inf]
+BasicTest.bar: in05: $i2:[-inf, inf]
+BasicTest.bar: in05: i3:[-inf, inf]
+
+BasicTest.bar: in06: $i0:[-inf, inf]
+BasicTest.bar: in06: $i1:[-inf, inf]
+BasicTest.bar: in06: $i2:[-inf, inf]
+BasicTest.bar: in06: i3:[-inf, inf]
+
+BasicTest.bar: in07: $i0:[-inf, inf]
+BasicTest.bar: in07: $i1:[-inf, inf]
+BasicTest.bar: in07: $i2:[-inf, inf]
+BasicTest.bar: in07: i3:[-inf, inf]
+
+BasicTest.bar: in08: $i0:[-inf, inf]
+BasicTest.bar: in08: $i1:[1,9]
+BasicTest.bar: in08: $i2:[-inf, inf]
+BasicTest.bar: in08: i3:[0,9]
+
+BasicTest.bar: in09: $i0:[-inf, inf]
+BasicTest.bar: in09: $i1:[1,8]
+BasicTest.bar: in09: $i2:[-inf, inf]
+BasicTest.bar: in09: i3:[0,8]
+
+BasicTest.bar: in10: $i0:[-inf, inf]
+BasicTest.bar: in10: $i1:[1,9]
+BasicTest.bar: in10: $i2:[-inf, inf]
+BasicTest.bar: in10: i3:[0,8]
+
+BasicTest.bar: in11: $i0:[-inf, inf]
+BasicTest.bar: in11: $i1:[1,9]
+BasicTest.bar: in11: $i2:[-inf, inf]
+BasicTest.bar: in11: i3:[0,8]
+
+BasicTest.bar: in12: $i0:[-inf, inf]
+BasicTest.bar: in12: $i1:[1,9]
+BasicTest.bar: in12: $i2:[-inf, inf]
+BasicTest.bar: in12: i3:[0,8]
+
+BasicTest.bar: in13: $i0:[-inf, inf]
+BasicTest.bar: in13: $i1:[1,9]
+BasicTest.bar: in13: $i2:[-inf, inf]
+BasicTest.bar: in13: i3:[1,9]
+
+BasicTest.bar: in14: $i0:[-inf, inf]
+BasicTest.bar: in14: $i1:[1,9]
+BasicTest.bar: in14: $i2:[-inf, inf]
+BasicTest.bar: in14: i3:[9,9]

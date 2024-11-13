@@ -1,0 +1,69 @@
+BasicTest.foo: in01: $i0:[-inf, inf]
+BasicTest.foo: in01: $i1:[-inf, inf]
+BasicTest.foo: in01: $i2:[-inf, inf]
+BasicTest.foo: in01: i3:[-inf, inf]
+
+BasicTest.foo: in02: $i0:[-inf, inf]
+BasicTest.foo: in02: $i1:[-inf, inf]
+BasicTest.foo: in02: $i2:[-inf, inf]
+BasicTest.foo: in02: i3:[-inf, inf]
+
+BasicTest.foo: in03: $i0:[-inf, inf]
+BasicTest.foo: in03: $i1:[-inf, inf]
+BasicTest.foo: in03: $i2:[-inf, inf]
+BasicTest.foo: in03: i3:[-inf, inf]
+
+BasicTest.foo: in04: $i0:[-inf, inf]
+BasicTest.foo: in04: $i1:[-inf, inf]
+BasicTest.foo: in04: $i2:[-inf, inf]
+BasicTest.foo: in04: i3:[-inf, inf]
+
+BasicTest.foo: in05: $i0:[-inf, inf]
+BasicTest.foo: in05: $i1:[-inf, inf]
+BasicTest.foo: in05: $i2:[-inf, inf]
+BasicTest.foo: in05: i3:[-inf, inf]
+
+BasicTest.foo: in06: $i0:[-inf, inf]
+BasicTest.foo: in06: $i1:[-inf, inf]
+BasicTest.foo: in06: $i2:[-inf, inf]
+BasicTest.foo: in06: i3:[-inf, inf]
+
+BasicTest.foo: in07: $i0:[-inf, inf]
+BasicTest.foo: in07: $i1:[-inf, inf]
+BasicTest.foo: in07: $i2:[-inf, inf]
+BasicTest.foo: in07: i3:[-inf, inf]
+
+BasicTest.foo: in08: $i0:[-inf, inf]
+BasicTest.foo: in08: $i1:[1,2]
+BasicTest.foo: in08: $i2:[-inf, inf]
+BasicTest.foo: in08: i3:[0,2]
+
+BasicTest.foo: in09: $i0:[-inf, inf]
+BasicTest.foo: in09: $i1:[1,1]
+BasicTest.foo: in09: $i2:[-inf, inf]
+BasicTest.foo: in09: i3:[0,1]
+
+BasicTest.foo: in10: $i0:[-inf, inf]
+BasicTest.foo: in10: $i1:[1,2]
+BasicTest.foo: in10: $i2:[-inf, inf]
+BasicTest.foo: in10: i3:[0,1]
+
+BasicTest.foo: in11: $i0:[-inf, inf]
+BasicTest.foo: in11: $i1:[1,2]
+BasicTest.foo: in11: $i2:[-inf, inf]
+BasicTest.foo: in11: i3:[0,1]
+
+BasicTest.foo: in12: $i0:[-inf, inf]
+BasicTest.foo: in12: $i1:[1,2]
+BasicTest.foo: in12: $i2:[-inf, inf]
+BasicTest.foo: in12: i3:[0,1]
+
+BasicTest.foo: in13: $i0:[-inf, inf]
+BasicTest.foo: in13: $i1:[1,2]
+BasicTest.foo: in13: $i2:[-inf, inf]
+BasicTest.foo: in13: i3:[1,2]
+
+BasicTest.foo: in14: $i0:[-inf, inf]
+BasicTest.foo: in14: $i1:[1,2]
+BasicTest.foo: in14: $i2:[-inf, inf]
+BasicTest.foo: in14: i3:[2,2]
