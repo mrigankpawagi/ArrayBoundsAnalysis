@@ -8,3 +8,7 @@ echo === building targets
 cd target1-pub
 javac -g *.java
 cd ..
+
+cd phase2-pub
+javac -g *.java
+cd ..
