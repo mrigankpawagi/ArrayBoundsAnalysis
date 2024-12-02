@@ -12,6 +12,9 @@ import soot.NormalUnitPrinter;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
+import soot.Value;
+import soot.jimple.Constant;
+import soot.jimple.IntConstant;
 import soot.Local;
 import soot.IntType;
 import soot.LongType;
@@ -21,10 +24,16 @@ import soot.ValueBox;
 import soot.toolkits.graph.UnitGraph;
 import soot.toolkits.graph.BriefUnitGraph;
 import soot.jimple.IfStmt;
+import soot.jimple.AssignStmt;
+import soot.Type;
+import soot.ArrayType;
+import soot.jimple.NewArrayExpr;
+import soot.jimple.internal.JArrayRef;
 
 import pav.Pair;
 import pav.LatticeElement;
 import pav.IntervalElement;
+import pav.IntegerArrayPointer;
 
 public class Analysis{
     public static String targetDirectory;
@@ -125,11 +134,152 @@ public class Analysis{
         }
         IntervalElement initialElement = new IntervalElement(initialIntervalMap);
 
-        Map<Integer, LatticeElement> result = runKildall(initialElement, flowPoints,
+        Map<Integer, LatticeElement> resultIntervalAnalysis = runKildall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
+
+        // get all integer arrays in the method
+        List<Local> integerArrays = new ArrayList<>();
+        for (Local local : body.getLocals()) {
+            Type type = local.getType();
+    
+            // Check if the type is an ArrayType and the base type is int
+            if (type instanceof ArrayType) {
+                ArrayType arrayType = (ArrayType) type;
+                if (arrayType.getElementType().toString().equals("int")) {
+                    integerArrays.add(local);
+                }
+            }
+        }
+
+        // get all the statements with "new int[...]"
+        Set<Unit> newArrayStatements = new HashSet<>();
+        for (Unit unit : body.getUnits()) {
+            if (unit instanceof AssignStmt) {
+                AssignStmt assignStmt = (AssignStmt) unit;
+                Value rhs = assignStmt.getRightOp();
+    
+                // Check if the right-hand side is a NewArrayExpr
+                if (rhs instanceof NewArrayExpr) {
+                    NewArrayExpr newArrayExpr = (NewArrayExpr) rhs;
+    
+                    // Check if the array type is int
+                    if (newArrayExpr.getBaseType().toString().equals("int")) {
+                        newArrayStatements.add(unit);
+                    }
+                }
+            }
+        }
+
+        // Run the Kildall's algorithm for Pointer Analysis with integer arrays
+        Map<Local, Set<Unit>> initialPointerMap = new HashMap<>();
+
+        // make all integer array variables point to {null}
+        for (Local local : integerArrays) {
+            initialPointerMap.put(local, new HashSet<Unit>());
+            // add null to this new hashset
+            initialPointerMap.get(local).add(null);
+        }
+
+        IntegerArrayPointer initialIntegerArrayPointer = new IntegerArrayPointer(initialPointerMap, newArrayStatements);
         
-        printOutput(result);
-        printTrace();
+        Map<Integer, LatticeElement> resultPointerAnalysis = runKildall(initialIntegerArrayPointer, flowPoints,
+                enclosingUnit, trueBranches);
+
+        // record the size of each allocated array
+        Map<Unit, Pair<Float, Float>> arraySizeMap = new HashMap<>();
+        for (Unit unit : newArrayStatements) {
+            NewArrayExpr newArrayExpr = (NewArrayExpr) ((AssignStmt) unit).getRightOp();
+            Value sizeValue = newArrayExpr.getSize();
+            
+            // check whether the array size is a constant
+            if (sizeValue instanceof Constant) {
+                float size = (float) ((IntConstant) sizeValue).value;
+                arraySizeMap.put(unit, new Pair<>(size, size));
+            } 
+            // check whether the array size is a variable
+            else if (sizeValue instanceof Local) {
+                Pair<Float, Float> size = ((IntervalElement) resultIntervalAnalysis.get(pointBeforeUnit.get(unit))).intervalMap.get(sizeValue);
+                arraySizeMap.put(unit, size);
+            }
+        }
+
+        // now check all the array accesses
+        Map<Integer, String> safetyMap = new HashMap<>();
+        int lineno = -1;
+        for (Unit unit : body.getUnits()) {
+            lineno++;
+            boolean safe = false;
+
+            // get all JArrayRefs in the unit
+            List<JArrayRef> arrayRefs = new ArrayList<>();
+            for (ValueBox box : unit.getUseBoxes()) {
+                if (box.getValue() instanceof JArrayRef) {
+                    Local base = (Local) ((JArrayRef) box.getValue()).getBase();
+                    if (integerArrays.contains(base)) {
+                        arrayRefs.add((JArrayRef) box.getValue());
+                    }
+                }
+            }
+            for (ValueBox box : unit.getDefBoxes()) {
+                if (box.getValue() instanceof JArrayRef) {
+                    Local base = (Local) ((JArrayRef) box.getValue()).getBase();
+                    if (integerArrays.contains(base)) {
+                        arrayRefs.add((JArrayRef) box.getValue());
+                    }
+                }
+            }
+
+            if (arrayRefs.isEmpty()) {
+                continue;
+            }
+
+            for (JArrayRef arrayRef : arrayRefs) {
+                Local base = (Local) arrayRef.getBase();
+                Value index = arrayRef.getIndex();
+
+                // check if the index is a constant
+                Pair<Float, Float> indexInterval = null;
+                if (index instanceof Constant) {
+                    int indexValue = ((IntConstant) index).value;
+                    indexInterval = new Pair<>((float) indexValue, (float) indexValue);
+                } else if (index instanceof Local) {
+                    indexInterval = ((IntervalElement) resultIntervalAnalysis.get(pointBeforeUnit.get(unit))).intervalMap.get(index);
+                }
+
+                if (indexInterval != null) {
+                    // check what the base points to in the resultPointerAnalysis
+                    Map<Local, Set<Unit>> basePointsToMap = ((IntegerArrayPointer) resultPointerAnalysis.get(pointBeforeUnit.get(unit))).pointerMap;
+                    if (basePointsToMap == null) {
+                        continue; // unreachable code. ignore.
+                    }
+                    Set<Unit> basePointsTo = basePointsToMap.get(base);
+                    if (basePointsTo.contains(null) && basePointsTo.size() == 1) {
+                        continue; // base points to null... must be unsafe!
+                    }
+
+                    // check all the array allocations that base points to
+                    boolean safeForThisAccess = true;
+                    for (Unit newArrayStmt : basePointsTo) {
+                        if (newArrayStmt == null) continue; 
+                        Pair<Float, Float> arraySize = arraySizeMap.get(newArrayStmt);
+                        if (arraySize != null) {
+                            if (indexInterval.second >= arraySize.first) {
+                                safeForThisAccess = false;
+                                break;
+                            }
+                        }
+                    }
+                    safe = safe || safeForThisAccess;
+                }
+            }
+
+            safetyMap.put(lineno, safe ? "Safe" : "Potentially Unsafe");
+        }
+
+        // Print the output (to STDOUT for now) from safetyMap
+        for (Map.Entry<Integer, String> safetyEntry : safetyMap.entrySet()) {
+            System.out.println(tClass + "." + tMethod + ": " + String.format("%02d", safetyEntry.getKey()) + ": " + safetyEntry.getValue());
+        }
     }
 
     // Running Kildall's algorithm
