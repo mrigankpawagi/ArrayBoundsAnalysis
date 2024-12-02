@@ -236,12 +236,14 @@ public class IntervalElement implements LatticeElement{
                 lower2 = interval2.first;
                 upper2 = interval2.second;
 
-                if (interval1.second == interval2.first) {
-                    upper1 = interval1.second - 1;
-                    lower2 = interval2.first + 1;
-                } else if (interval1.first == interval2.second) {
-                    lower1 = interval1.first + 1;
-                    upper2 = interval2.second - 1;
+                if (interval1.first == interval1.second && interval1.first == interval2.first) {
+                    lower2 += 1;
+                } else if (interval1.first == interval1.second && interval1.first == interval2.second) {
+                    upper2 -= 1;
+                } else if (interval2.first == interval2.second && interval2.first == interval1.first) {
+                    lower1 += 1;
+                } else if (interval2.first == interval2.second && interval2.first == interval1.second) {
+                    upper1 -= 1;
                 }
                 return new Pair<>(new Pair<>(lower1, upper1), new Pair<>(lower2, upper2));
             default:
