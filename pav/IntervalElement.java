@@ -269,6 +269,8 @@ public class IntervalElement implements LatticeElement{
         if (stmt instanceof AssignStmt) {
             // Handle assignment statements
             AssignStmt assignStmt = (AssignStmt) stmt;
+
+            if (!(assignStmt.getLeftOp() instanceof Local)) return this.clone(); // cannot handle references
             Local leftVar = (Local) assignStmt.getLeftOp();
             Value rightOp = assignStmt.getRightOp();
 
@@ -468,6 +470,7 @@ public class IntervalElement implements LatticeElement{
             return new IntervalElement(newIntervalMap);
         } else if (stmt instanceof IdentityStmt) {
             IdentityStmt identityStmt = (IdentityStmt) stmt;
+            if (!(identityStmt.getLeftOp() instanceof Local)) return this.clone(); // cannot handle references
             Local leftVar = (Local) identityStmt.getLeftOp();
 
             // always send leftVar to topInterval
