@@ -138,9 +138,6 @@ public class Analysis{
         Map<Integer, LatticeElement> resultIntervalAnalysis = runKildall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
 
-        printOutput(resultIntervalAnalysis);
-        printTrace();        
-
         // get all integer arrays in the method
         List<Local> integerArrays = new ArrayList<>();
         for (Local local : body.getLocals()) {
