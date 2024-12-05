@@ -87,7 +87,7 @@ public class IntervalElement implements LatticeElement{
     }
 
     // check if the IntervalElement is bot
-    private boolean isBot() {
+    public boolean isBot() {
         return this.intervalMap == null;
     }
 

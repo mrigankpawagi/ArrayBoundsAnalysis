@@ -33,16 +33,11 @@ class BasicTest{
         }
     }
 
-    public static void foo2() {
+    public static void foo2(int x) {
         int[] a = new int[10];
-        int[] b = new int[10];
-        a[1] = 10;
-        if (a[1] == 9) {
-            b = a;
+        if (x == 1) {
+            a = null;
         }
-        else {
-            b = null;
-        }
-        b[0] = 1; // b may point to a, Null; access unsafe
-    }
+        a[4] = 1;
+    }    
 }

@@ -13,4 +13,6 @@ public interface LatticeElement {
     boolean equals(Object o);
 
     LatticeElement getBot();
+
+    public boolean isBot();
 }

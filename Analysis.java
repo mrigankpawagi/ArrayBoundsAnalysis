@@ -138,6 +138,9 @@ public class Analysis{
         Map<Integer, LatticeElement> resultIntervalAnalysis = runKildall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
 
+        printOutput(resultIntervalAnalysis);
+        printTrace();        
+
         // get all integer arrays in the method
         List<Local> integerArrays = new ArrayList<>();
         for (Local local : body.getLocals()) {
@@ -210,7 +213,6 @@ public class Analysis{
         int lineno = -1;
         for (Unit unit : body.getUnits()) {
             lineno++;
-            boolean safe = false;
 
             // get all JArrayRefs in the unit
             List<JArrayRef> arrayRefs = new ArrayList<>();
@@ -235,45 +237,47 @@ public class Analysis{
                 continue;
             }
 
-            for (JArrayRef arrayRef : arrayRefs) {
-                Local base = (Local) arrayRef.getBase();
-                Value index = arrayRef.getIndex();
+            boolean safe = true;
 
-                // check if the index is a constant
-                Pair<Float, Float> indexInterval = null;
-                if (index instanceof Constant) {
-                    int indexValue = ((IntConstant) index).value;
-                    indexInterval = new Pair<>((float) indexValue, (float) indexValue);
-                } else if (index instanceof Local) {
-                    indexInterval = ((IntervalElement) resultIntervalAnalysis.get(pointBeforeUnit.get(unit))).intervalMap.get(index);
-                }
+            // check that neither interval analysis nor pointer analysis is bot
+            if (!(resultIntervalAnalysis.get(pointBeforeUnit.get(unit)).isBot() || resultPointerAnalysis.get(pointBeforeUnit.get(unit)).isBot())) {
+                // every array access should be safe
+                for (JArrayRef arrayRef : arrayRefs) {
+                    Local base = (Local) arrayRef.getBase();
+                    Value index = arrayRef.getIndex();
 
-                if (indexInterval != null) {
-                    // check what the base points to in the resultPointerAnalysis
-                    Map<Local, Set<Unit>> basePointsToMap = ((IntegerArrayPointer) resultPointerAnalysis.get(pointBeforeUnit.get(unit))).pointerMap;
-                    if (basePointsToMap == null) {
-                        continue; // unreachable code. ignore.
-                    }
-                    Set<Unit> basePointsTo = basePointsToMap.get(base);
-                    if (basePointsTo.contains(null) && basePointsTo.size() == 1) {
-                        continue; // base points to null... must be unsafe!
+                    // check if the index is a constant or a variable (and get its interval)
+                    Pair<Float, Float> indexInterval = null;
+                    if (index instanceof Constant) {
+                        int indexValue = ((IntConstant) index).value;
+                        indexInterval = new Pair<>((float) indexValue, (float) indexValue);
+                    } else if (index instanceof Local) {
+                        indexInterval = ((IntervalElement) resultIntervalAnalysis.get(pointBeforeUnit.get(unit))).intervalMap.get(index);
                     }
 
-                    // check all the array allocations that base points to
-                    boolean safeForThisAccess = true;
+                    // check what the base points to
+                    Set<Unit> basePointsTo = ((IntegerArrayPointer) resultPointerAnalysis.get(pointBeforeUnit.get(unit))).pointerMap.get(base);
+
+                    // check if the base points to null
+                    if (basePointsTo.contains(null)) {
+                        safe = false; // null pointer possible!
+                        break;
+                    }
+
+                    // check that the index is within the bounds of all the arrays that base points to
                     for (Unit newArrayStmt : basePointsTo) {
-                        if (newArrayStmt == null) continue; 
                         Pair<Float, Float> arraySize = arraySizeMap.get(newArrayStmt);
                         if (arraySize != null) {
                             if (indexInterval.second >= arraySize.first) {
-                                safeForThisAccess = false;
+                                safe = false; // out of bounds access!
                                 break;
                             }
                         }
                     }
-                    safe = safe || safeForThisAccess;
+
                 }
-            }
+            } 
+            // otherwise, unreachable code is safe!
 
             safetyMap.put(lineno, safe ? "Safe" : "Potentially Unsafe");
         }
