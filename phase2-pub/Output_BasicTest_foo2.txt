@@ -1,0 +1,3 @@
+BasicTest.foo2: 02: Safe
+BasicTest.foo2: 03: Safe
+BasicTest.foo2: 08: Safe

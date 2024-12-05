@@ -184,6 +184,7 @@ public class Analysis{
         
         Map<Integer, LatticeElement> resultPointerAnalysis = runKildall(initialIntegerArrayPointer, flowPoints,
                 enclosingUnit, trueBranches);
+        printPointerAnalysis(resultPointerAnalysis);
 
         // record the size of each allocated array
         Map<Unit, Pair<Float, Float>> arraySizeMap = new HashMap<>();
@@ -393,7 +394,7 @@ public class Analysis{
             CFGToDotGraph cfgForMethod = new CFGToDotGraph();
             cfgForMethod.drawCFG(graph);
             DotGraph cfgDot = cfgForMethod.drawCFG(graph);
-            cfgDot.plot(method.getName() + "cfg.dot");
+            cfgDot.plot(targetDirectory + "/" + method.getName() + "cfg.dot");
         }
     }
 
@@ -423,8 +424,8 @@ public class Analysis{
 
    // Generate Array safety output as mentioned in the requirements
     private static void printArraySafety(Map<Integer, String> safetyMap) {
-        // Create a file tclass.tmethod.output.txt
-        String outputFileName = targetDirectory + "/Output" + tClass + "_" + tMethod + ".txt";
+        // Create a file Output_tclass_tmethod.txt
+        String outputFileName = targetDirectory + "/Output_" + tClass + "_" + tMethod + ".txt";
         try {
             java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
             java.io.PrintWriter pw = new java.io.PrintWriter(fw);
@@ -440,40 +441,16 @@ public class Analysis{
         }
     }
 
-    // Generate File 1 output as mentioned in the requirements
-    private static void printOutput(Map<Integer, LatticeElement> result) {
-        // Create a file tclass.tmethod.output.txt
-        String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".output.txt";
+    // Generate Points-to-Analysis output as mentioned in the requirements
+    private static void printPointerAnalysis(Map<Integer, LatticeElement> result) {
+        // Create a file Output_tclass_points_to_analysis_tmethod.txt
+        String outputFileName = targetDirectory + "/Output_" + tClass + "_points_to_analysis_" + tMethod + ".txt";
         try {
             java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
             java.io.PrintWriter pw = new java.io.PrintWriter(fw);
 
-            for (Integer point : result.keySet()) {
-                // Skip the entry point (0)
-                if (point == 0) {
-                    continue;
-                }
-                // Pad the point number so it is always 2 digits
-                String statementNumber = String.format("%02d", point);
-                if (((IntervalElement) result.get(point)).intervalMap == null) {
-                    // skip printing bot
-                    continue;
-                }
-                // Sort variables by name
-                List<Local> locals = new ArrayList<>(((IntervalElement) result.get(point)).intervalMap.keySet());
-                Collections.sort(locals, new Comparator<Local>() {
-                    public int compare(Local l1, Local l2) {
-                        return l1.getName().compareTo(l2.getName());
-                    }
-                });
-                for (Local local : locals) {
-                    Pair<Float, Float> interval = ((IntervalElement) result.get(point)).intervalMap.get(local);
-
-                    String lower = interval.first == Float.NEGATIVE_INFINITY ? "-inf" : String.valueOf(Math.round(interval.first));
-                    String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
-                    pw.print(tClass + "." + tMethod + ": in" + statementNumber + ": ");
-                    pw.println(local.getName() + ":[" + lower + ", " + upper + "]");
-                } 
+            for (Integer point: result.keySet()) {
+                pw.println(point + " : " + result.get(point));
             }
 
             pw.close();

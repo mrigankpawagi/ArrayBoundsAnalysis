@@ -33,7 +33,7 @@ time \
     java -Xms800m -Xmx3g Analysis "$DIRNAME" "$MAINCLASS" "$TARGETCLASS" "$TARGETMETHOD" "$UPPERBOUND"
 
 
-dot -Tpng -o cfg.png ${TARGETMETHOD}cfg.dot
+# dot -Tpng -o cfg.png ${TARGETMETHOD}cfg.dot
 
 
 errstatus=0
