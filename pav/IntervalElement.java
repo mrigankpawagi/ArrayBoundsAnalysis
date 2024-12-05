@@ -21,9 +21,6 @@ import soot.jimple.EqExpr;
 import soot.jimple.NeExpr;
 import soot.jimple.Constant;
 
-import pav.Pair;
-import pav.LatticeElement;
-
 public class IntervalElement implements LatticeElement{
     public Map<Local, Pair<Float, Float>> intervalMap;
     public static final IntervalElement bot = new IntervalElement();

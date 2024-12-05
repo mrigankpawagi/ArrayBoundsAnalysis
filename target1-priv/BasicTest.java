@@ -12,6 +12,7 @@ class BasicTest {
         }
         if (i == j) {
             int l = i;
+            k = l;
         }
     }
 }

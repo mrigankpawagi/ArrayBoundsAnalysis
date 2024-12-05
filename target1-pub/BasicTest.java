@@ -42,5 +42,6 @@ class BasicTest {
         if (i == j) {
             l = i;
         }
+        k = l;
     }
 }

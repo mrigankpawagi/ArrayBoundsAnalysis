@@ -32,10 +32,6 @@ echo  "=== Running" Analysis "$DIRNAME" "$MAINCLASS" "$TARGETCLASS" "$TARGETMETH
 time \
     java -Xms800m -Xmx3g Analysis "$DIRNAME" "$MAINCLASS" "$TARGETCLASS" "$TARGETMETHOD" "$UPPERBOUND"
 
-
-# dot -Tpng -o cfg.png ${TARGETMETHOD}cfg.dot
-
-
 errstatus=0
 function checkfile() {
     f=$1
@@ -45,9 +41,6 @@ function checkfile() {
         errstatus=-1
     fi
 }
-
-# checkfile $DIRNAME/$TARGETCLASS.$TARGETMETHOD.output.txt
-# checkfile $DIRNAME/$TARGETCLASS.$TARGETMETHOD.fulloutput.txt
 
 # if any errors, then exit with errorcode
 [ $errstatus -eq 0 ] || exit 1

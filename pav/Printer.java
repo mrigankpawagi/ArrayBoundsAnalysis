@@ -88,46 +88,42 @@ public class Printer{
             System.out.println("Error writing to file " + outputFileName);
         }
     }
-/*
-    // Generate File 2 ouput as mentioned in the requirements
-    public static void printTrace(String targetDirectory, String tClass, String tMethod) {
-        // Create a file tclass.tmethod.fulloutput.txt
-        String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".fulloutput.txt";
+
+    // Generate File 1 output as mentioned in the requirements
+    public static void IntervalAnalysis(String targetDirectory, String tClass, String tMethod, Map<Integer, LatticeElement> result) {
+        // Create a file Output_tclass_interval_analysis_tmethod.txt
+        String outputFileName = targetDirectory + "/Output_" + tClass + "_interval_analysis_" + tMethod + ".txt";
         try {
             java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
             java.io.PrintWriter pw = new java.io.PrintWriter(fw);
-            boolean wasLastLineNewline = false;
 
-            for (Pair<Integer,LatticeElement> point : trace) {
-                if (point.first() == -1) {
-                    if (!wasLastLineNewline) {
-                        pw.println("");
-                        wasLastLineNewline = true;
-                    }
+            for (Integer point : result.keySet()) {
+                // Skip the entry point (0)
+                if (point == 0) {
                     continue;
                 }
                 // Pad the point number so it is always 2 digits
-                String statementNumber = String.format("%02d", point.first());
-                if (((IntervalElement) point.second()).intervalMap == null) {
+                String statementNumber = String.format("%02d", point);
+                if (((IntervalElement) result.get(point)).intervalMap == null) {
                     // skip printing bot
                     continue;
                 }
                 // Sort variables by name
-                List<Local> locals = new ArrayList<>(((IntervalElement) point.second()).intervalMap.keySet());
+                List<Local> locals = new ArrayList<>(((IntervalElement) result.get(point)).intervalMap.keySet());
                 Collections.sort(locals, new Comparator<Local>() {
                     public int compare(Local l1, Local l2) {
                         return l1.getName().compareTo(l2.getName());
                     }
                 });
                 for (Local local : locals) {
-                    Pair<Float, Float> interval = ((IntervalElement) point.second()).intervalMap.get(local);
+                    Pair<Float, Float> interval = ((IntervalElement) result.get(point)).intervalMap.get(local);
 
                     String lower = interval.first == Float.NEGATIVE_INFINITY ? "-inf" : String.valueOf(Math.round(interval.first));
                     String upper = interval.second == Float.POSITIVE_INFINITY ? "inf" : String.valueOf(Math.round(interval.second));
                     pw.print(tClass + "." + tMethod + ": in" + statementNumber + ": ");
                     pw.println(local.getName() + ":[" + lower + ", " + upper + "]");
-                    wasLastLineNewline = false;
-                } 
+                }
+                pw.println();
             }
 
             pw.close();
@@ -136,5 +132,4 @@ public class Printer{
             System.out.println("Error writing to file " + outputFileName);
         }
     }
-*/
 }

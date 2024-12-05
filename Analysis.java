@@ -7,8 +7,6 @@ import soot.Body;
 import soot.SootClass;
 import soot.SootMethod;
 import soot.jimple.Stmt;
-import soot.UnitPrinter;
-import soot.NormalUnitPrinter;
 import soot.toolkits.graph.ExceptionalUnitGraph;
 import soot.util.cfgcmd.CFGToDotGraph;
 import soot.util.dot.DotGraph;
@@ -40,12 +38,6 @@ public class Analysis{
     public static String targetDirectory;
     public static String tClass;
     public static String tMethod;
-
-    private DotGraph dot = new DotGraph("callgraph");
-    private static HashMap<String, Boolean> visited = new HashMap<String, Boolean>();
-
-    // Trace will store details necessary for File 2 (fulloutput.txt)
-    private static List<Pair<Integer, LatticeElement>> trace = new ArrayList<>();
 
     // Analysis function
     public static void doAnalysis(SootMethod targetMethod) {
@@ -137,6 +129,8 @@ public class Analysis{
 
         Map<Integer, LatticeElement> resultIntervalAnalysis = runKildall(initialElement, flowPoints,
                 enclosingUnit, trueBranches);
+
+        Printer.IntervalAnalysis(targetDirectory, tClass, tMethod, resultIntervalAnalysis);
 
         // get all integer arrays in the method
         List<Local> integerArrays = new ArrayList<>();
@@ -360,7 +354,7 @@ public class Analysis{
         System.out.println("tmethod: " + targetMethod);
         System.out.println("tmethodname: " + tMethod);
         // mi iterates over all methods in the targetClass
-        Iterator mi = targetClass.getMethods().iterator();
+        Iterator<?> mi = targetClass.getMethods().iterator();
         // targetClass.getMethods() retrieves all the methods in targetClass
         while (mi.hasNext()) {
             SootMethod sm = (SootMethod) mi.next();

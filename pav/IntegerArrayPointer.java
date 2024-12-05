@@ -7,14 +7,10 @@ import soot.jimple.Stmt;
 import soot.Local;
 import soot.jimple.IfStmt;
 import soot.jimple.AssignStmt;
-import soot.Value;
 import soot.jimple.ConditionExpr;
-import soot.jimple.NewArrayExpr;
 import soot.jimple.EqExpr;
 import soot.jimple.NeExpr;
 import soot.jimple.NullConstant;
-
-import pav.LatticeElement;
 
 public class IntegerArrayPointer implements LatticeElement{
     public Map<Local, Set<Unit>> pointerMap;
