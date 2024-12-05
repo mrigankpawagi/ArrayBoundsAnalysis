@@ -22,8 +22,8 @@ set -e
 # ./run-analysis-one.sh "./target1-priv" "BasicTest" "BasicTest" "foo" 25
 ./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "foo" 25
 ./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "bar" 25
+./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "foo2" 25
 #./run-analysis-one.sh "./phase2-priv" "BasicTest" "BasicTest" "foo" 25
-#./run-analysis-one.sh "./phase2-priv" "BasicTest" "BasicTest" "bar" 25
 ./cleanup.sh
 
 # You should edit the line above whenever you want to change the parameters to the analysis. 
