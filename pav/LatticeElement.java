@@ -11,7 +11,7 @@ public interface LatticeElement {
 
     // Equals method
     boolean equals(Object o);
-
+    
     LatticeElement getBot();
 
     public boolean isBot();

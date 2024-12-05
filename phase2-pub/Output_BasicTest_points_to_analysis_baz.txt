@@ -1,0 +1,23 @@
+BasicTest.baz: in01: r0:[new00]
+
+BasicTest.baz: in02: r0:[new00]
+BasicTest.baz: in02: r1:[new01]
+
+BasicTest.baz: in03: r0:[new00]
+BasicTest.baz: in03: r1:[new01]
+
+BasicTest.baz: in04: r0:[new00]
+BasicTest.baz: in04: r1:[new01]
+BasicTest.baz: in04: r2:[new00]
+
+BasicTest.baz: in05: r0:[new00]
+BasicTest.baz: in05: r1:[new01]
+
+BasicTest.baz: in06: r0:[new00]
+BasicTest.baz: in06: r1:[new01]
+BasicTest.baz: in06: r2:[null, new00]
+
+BasicTest.baz: in07: r0:[new00]
+BasicTest.baz: in07: r1:[new01]
+BasicTest.baz: in07: r2:[null, new00]
+

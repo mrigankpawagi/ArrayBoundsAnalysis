@@ -20,7 +20,6 @@ public class IntegerArrayPointer implements LatticeElement{
     public Map<Local, Set<Unit>> pointerMap;
     public final Set<Unit> allocUnits;
     public static final IntegerArrayPointer bot = new IntegerArrayPointer();
-    // public static final Pair<Float, Float> topPair = new Pair<>(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
 
     public LatticeElement getBot() {
         return bot.clone();

@@ -33,11 +33,23 @@ class BasicTest{
         }
     }
 
-    public static void foo2(int x) {
+    public static void fun(int x) {
         int[] a = new int[10];
         if (x == 1) {
             a = null;
         }
         a[4] = 1;
-    }    
+    }
+
+    public static void baz() {
+        int[] a = new int[10];
+        int[] b = new int[10];
+        int x = 1;
+        if (x == 1) {
+            b = a;
+        } else {
+            b = null;
+        }
+        b[0] = 1;
+    }
 }

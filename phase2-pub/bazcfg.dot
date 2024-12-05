@@ -1,0 +1,36 @@
+digraph "void baz()" {
+    label="void baz()";
+    node [shape=box];
+    "0" [style=filled,fillcolor=gray,label="r0 = newarray (int)[10]",];
+    "1" [label="r1 = newarray (int)[10]",];
+    "0"->"1" [color=black,];
+    "8" [style=invis,label="Esc",];
+    "0"->"8" [color=lightgray,label="\l+vmErrors",];
+    "2" [label="if 1 != 1 goto label1",];
+    "1"->"2" [color=black,];
+    "9" [style=invis,label="Esc",];
+    "1"->"9" [color=lightgray,label="\l+vmErrors",];
+    "3" [label="r2 = r0",];
+    "2"->"3" [color=black,];
+    "5" [label="label1: r2 = null",];
+    "2"->"5" [color=black,];
+    "10" [style=invis,label="Esc",];
+    "2"->"10" [color=lightgray,label="\l+vmErrors",];
+    "4" [label="goto label2",];
+    "3"->"4" [color=black,];
+    "11" [style=invis,label="Esc",];
+    "3"->"11" [color=lightgray,label="\l+vmErrors",];
+    "6" [label="label2: r2[0] = 1",];
+    "4"->"6" [color=black,];
+    "12" [style=invis,label="Esc",];
+    "4"->"12" [color=lightgray,label="\l+vmErrors",];
+    "5"->"6" [color=black,];
+    "13" [style=invis,label="Esc",];
+    "5"->"13" [color=lightgray,label="\l+vmErrors",];
+    "7" [style=filled,fillcolor=lightgray,label="return",];
+    "6"->"7" [color=black,];
+    "14" [style=invis,label="Esc",];
+    "6"->"14" [color=lightgray,label="\l+vmErrors\l+ArrayIndexOutOfBounds\l+NullPointer",];
+    "15" [style=invis,label="Esc",];
+    "7"->"15" [color=lightgray,label="\l+vmErrors",];
+}

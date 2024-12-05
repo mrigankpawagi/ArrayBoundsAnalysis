@@ -23,7 +23,8 @@ set -e
 # ./run-analysis-one.sh "./target1-pub" "BasicTest" "BasicTest" "foo" 10
 ./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "foo" 25
 ./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "bar" 25
-./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "foo2" 25
+./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "fun" 25
+./run-analysis-one.sh "./phase2-pub" "BasicTest" "BasicTest" "baz" 25
 #./run-analysis-one.sh "./phase2-priv" "BasicTest" "BasicTest" "foo" 25
 ./cleanup.sh
 

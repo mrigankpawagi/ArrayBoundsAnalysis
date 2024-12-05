@@ -1,3 +1,0 @@
-BasicTest.bar: 02: Safe
-BasicTest.bar: 10: Potentially Unsafe
-BasicTest.bar: 11: Potentially Unsafe

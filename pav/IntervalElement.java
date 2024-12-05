@@ -29,13 +29,13 @@ public class IntervalElement implements LatticeElement{
     public static final IntervalElement bot = new IntervalElement();
     public static final Pair<Float, Float> topPair = new Pair<>(Float.NEGATIVE_INFINITY, Float.POSITIVE_INFINITY);
 
-    public LatticeElement getBot() {
-        return bot.clone();
-    }
-
     // lowerBound and upperBound for the intervals
     public static float lowerBound = Float.NEGATIVE_INFINITY;
     public static float upperBound = Float.POSITIVE_INFINITY;
+
+    public LatticeElement getBot() {
+        return bot.clone();
+    }
 
     public IntervalElement(Map<Local, Pair<Float, Float>> givenIntervalMap) {
         // check that all intervals are valid

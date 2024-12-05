@@ -285,8 +285,7 @@ public class Analysis{
     // Running Kildall's algorithm
     public static Map<Integer, LatticeElement> runKildall(LatticeElement initialElement, Map<Integer, Set<Integer>> flowPoints,
             Map<Pair<Integer, Integer>, Unit> enclosingUnit, Set<Pair<Integer, Integer>> trueBranches) {
-        // facts will store details necessary for output.txt
-        // trace will store details necessary for fulloutput.txt
+        // facts will store details necessary for pointer_analysis
         Map<Integer, LatticeElement> facts = new HashMap<>();
         
         // Initialize facts with initial lattice elements
@@ -294,8 +293,6 @@ public class Analysis{
             facts.put(point, initialElement.getBot());
         }
         facts.put(0, initialElement);
-        trace.add(new Pair<Integer, LatticeElement>(0, initialElement));
-        trace.add(new Pair<Integer, LatticeElement>(-1, initialElement.getBot()));  // Spacer representing newline
 
         // Initialize worklist with all nodes in the flowPoints
         Queue<Integer> worklist = new LinkedList<>(flowPoints.keySet());
@@ -312,12 +309,10 @@ public class Analysis{
                 LatticeElement oldSuccFact = facts.get(succ);
                 LatticeElement newSuccFact = oldSuccFact.join(newFact);
                 facts.put(succ, newSuccFact);
-                trace.add(new Pair<Integer, LatticeElement>(succ, newSuccFact));
                 if (!newSuccFact.equals(oldSuccFact)) {
                     worklist.add(succ);
                 }
             }
-            trace.add(new Pair<Integer, LatticeElement>(-1, initialElement.getBot()));
         }
 
         // Return the final facts map
