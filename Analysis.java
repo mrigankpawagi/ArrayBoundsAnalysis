@@ -276,10 +276,7 @@ public class Analysis{
             safetyMap.put(lineno, safe ? "Safe" : "Potentially Unsafe");
         }
 
-        // Print the output (to STDOUT for now) from safetyMap
-        for (Map.Entry<Integer, String> safetyEntry : safetyMap.entrySet()) {
-            System.out.println(tClass + "." + tMethod + ": " + String.format("%02d", safetyEntry.getKey()) + ": " + safetyEntry.getValue());
-        }
+        printArraySafety(safetyMap);
     }
 
     // Running Kildall's algorithm
@@ -400,6 +397,7 @@ public class Analysis{
         }
     }
 
+/*  
     public static void printUnit(int lineno, Body b, Unit u) {
         UnitPrinter up = new NormalUnitPrinter(b);
         u.toString(up);
@@ -421,8 +419,28 @@ public class Analysis{
             }
         }
     }
+*/
 
-    // Generate File 1 ouput as mentioned in the requirements
+   // Generate Array safety output as mentioned in the requirements
+    private static void printArraySafety(Map<Integer, String> safetyMap) {
+        // Create a file tclass.tmethod.output.txt
+        String outputFileName = targetDirectory + "/Output" + tClass + "_" + tMethod + ".txt";
+        try {
+            java.io.FileWriter fw = new java.io.FileWriter(outputFileName);
+            java.io.PrintWriter pw = new java.io.PrintWriter(fw);
+
+            for (Map.Entry<Integer, String> safetyEntry : safetyMap.entrySet()) {
+                pw.println(tClass + "." + tMethod + ": " + String.format("%02d", safetyEntry.getKey()) + ": " + safetyEntry.getValue());
+            }
+
+            pw.close();
+            fw.close();
+        } catch (java.io.IOException e) {
+            System.out.println("Error writing to file " + outputFileName);
+        }
+    }
+
+    // Generate File 1 output as mentioned in the requirements
     private static void printOutput(Map<Integer, LatticeElement> result) {
         // Create a file tclass.tmethod.output.txt
         String outputFileName = targetDirectory + "/" + tClass + "." + tMethod + ".output.txt";

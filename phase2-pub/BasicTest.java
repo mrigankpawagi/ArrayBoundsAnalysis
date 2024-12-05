@@ -29,7 +29,5 @@ class BasicTest{
             a[i] = a[i+1];  // Both indexes potentially unsafe
             i++;
         }
-    }
-
-    
+    }    
 }
