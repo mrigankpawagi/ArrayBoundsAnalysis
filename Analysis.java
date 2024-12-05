@@ -366,6 +366,7 @@ public class Analysis{
 
         // If tMethod is found in targetClass 
         if (methodFound) {
+            Printer.Info(targetMethod);
             drawMethodDependenceGraph(targetMethod);
 
             IntervalElement.lowerBound = 0;

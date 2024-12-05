@@ -2,7 +2,12 @@ package pav;
 
 import java.util.*;
 import soot.Local;
+import soot.SootMethod;
 import soot.Unit;
+import soot.jimple.Stmt;
+import soot.Body;
+import soot.UnitPrinter;
+import soot.NormalUnitPrinter;
 
 public class Printer{
     // Generate Array safety output as mentioned in the requirements
@@ -130,6 +135,28 @@ public class Printer{
             fw.close();
         } catch (java.io.IOException e) {
             System.out.println("Error writing to file " + outputFileName);
+        }
+    }
+
+    public static void printUnit(int lineno, Body b, Unit u){
+        UnitPrinter up = new NormalUnitPrinter(b);
+        u.toString(up);
+        String linenostr = String.format("%02d", lineno) + ": ";
+        System.out.println(linenostr + up.toString());
+    }
+
+    public static void Info(SootMethod entryMethod) {
+        if (!entryMethod.isPhantom() && entryMethod.isConcrete()) {
+            Body body = entryMethod.retrieveActiveBody();
+
+            int lineno = 0;
+            for (Unit u : body.getUnits()) {
+                if (!(u instanceof Stmt)) {
+                    continue;
+                }
+                printUnit(lineno, body, u);
+                lineno++;
+            }
         }
     }
 }
