@@ -1,4 +1,4 @@
-## Static analysis to find out out-of-bound array indexes in Java programs.
+## Static analysis to find out-of-bound array indexes in Java programs.
 - Build Docker image
   ```bash
   docker build -t pav_project:v1 .
