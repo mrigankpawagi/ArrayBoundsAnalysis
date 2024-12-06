@@ -244,6 +244,8 @@ public class Analysis{
                         indexInterval = new Pair<>((float) indexValue, (float) indexValue);
                     } else if (index instanceof Local) {
                         indexInterval = ((IntervalElement) resultIntervalAnalysis.get(pointBeforeUnit.get(unit))).intervalMap.get(index);
+                    } else {   // To prevent indexInterval from being null
+                        indexInterval = new Pair<>((float) 0, (float) 0);
                     }
 
                     // check what the base points to

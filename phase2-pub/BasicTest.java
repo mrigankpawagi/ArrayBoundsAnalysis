@@ -33,6 +33,7 @@ class BasicTest{
         }
     }
 
+    @SuppressWarnings("null")
     public static void fun(int x) {
         int[] a = new int[10];
         if (x == 1) {
@@ -41,6 +42,7 @@ class BasicTest{
         a[4] = 1;
     }
 
+    @SuppressWarnings("null")
     public static void baz() {
         int[] a = new int[10];
         int[] b = new int[10];
