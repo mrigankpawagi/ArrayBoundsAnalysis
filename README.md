@@ -1,4 +1,4 @@
-## Steps  to build the tool and the target programs, and to run the tool:
+## Static analysis to find out out-of-bound array indexes in Java programs.
 - Build Docker image
   ```bash
   docker build -t pav_project:v1 .
