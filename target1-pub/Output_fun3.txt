@@ -1,3 +1,0 @@
-BasicTest.fun3: in01: i0:[0, inf]
-BasicTest.fun3: in02: i0:[0, inf]
-BasicTest.fun3: in03: i0:[2, inf]

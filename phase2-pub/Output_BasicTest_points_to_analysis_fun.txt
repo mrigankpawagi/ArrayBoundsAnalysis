@@ -1,9 +1,0 @@
-
-BasicTest.fun: in02: r0:[new00]
-
-BasicTest.fun: in03: r0:[new00]
-
-BasicTest.fun: in04: r0:[null, new00]
-
-BasicTest.fun: in05: r0:[null, new00]
-
