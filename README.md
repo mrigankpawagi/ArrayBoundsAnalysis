@@ -16,11 +16,6 @@
 
   Within the interactive shell of the container, cd to /home/SootAnalysis, then build the target program and the tool, and run the tool on the target program, as explained below:
 
-- To compile the target programs (i.e., the test programs to analyze),  run from the shell command line:
-  ```
-  ./build-targets
-  ```
-
 - To compile the Analysis:
   ```
   ./build-analysis
@@ -28,12 +23,9 @@
 
 - To run the analysis on the test program:
   ```
-  ./run-analysis.sh
+  ./run-analysis.sh <Dir> <MainClass> <TargetClass> <TargetMethod>
   ```
 
 ## Authors
 - Alan Jojo
 - Mrigank Pawagi
-
-## Project status
-Under construction and testing
